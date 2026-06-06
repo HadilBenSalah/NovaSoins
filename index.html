@@ -24,7 +24,7 @@
       --border-on-dark: rgba(110,207,168,0.12);
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
 
     body {
       font-family: 'DM Sans', sans-serif;
@@ -243,7 +243,7 @@
     .footer-text { font-size:.8rem; color:rgba(255,255,255,.35); }
 
     /* ── RESTRICTED BANNER ── */
-    .restricted-banner { display:none; background:rgba(110,207,168,.12); border-bottom:1px solid var(--border-on-dark); padding:1rem 3rem; text-align:center; color:var(--accent); font-size:.9rem; font-weight:500; }
+    .restricted-banner { display:none; background:rgba(110,207,168,.12); border-bottom:1px solid var(--border-on-dark); padding:1rem 1.5rem; text-align:center; color:var(--accent); font-size:.9rem; font-weight:500; }
     .restricted-banner.active { display:block; }
 
     /* ── ADMIN MODAL ── */
@@ -322,6 +322,18 @@
       .auth-wrap { gap:1.5rem; }
       .modal-overlay.active .modal-box { top:1rem; transform:translateX(-50%); }
       .modal-box { padding:1.5rem; border-radius:16px; }
+    }
+    /* ── MOBILE OVERFLOW FIX ── */
+    * { min-width: 0; }
+    img, video, iframe { max-width: 100%; }
+    @media(max-width:480px){
+      nav { padding: 0 .75rem; }
+      .hero { padding: 4.5rem .75rem 2.5rem; }
+      .hero h1 { font-size: 1.75rem; }
+      .auth-section, .modules-section, .about-section { padding: 3rem .75rem; }
+      footer { padding: 2rem .75rem; }
+      .restricted-banner { padding: .75rem; font-size: .8rem; }
+      .modal-box { width: calc(100vw - 1rem); padding: 1.25rem; }
     }
   </style>
 </head>
