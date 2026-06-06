@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaSoins Infirmiers — Plateforme de Formation Paramédicale</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --dark-bg: #0B1E2D;
+      --surface-dark: #112534;
+      --primary: #1A6B8A;
+      --primary-light: #2E86AB;
+      --accent: #6ECFA8;
+      --accent-soft: #C8F0E0;
+      --surface: #F4F8FA;
+      --white: #ffffff;
+      --text-primary: #1E3344;
+      --text-muted: #6B8A9A;
+      --border: rgba(30,51,68,0.1);
+      --border-on-dark: rgba(110,207,168,0.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      animation: pageLoadFadeIn 0.6s ease-out both;
+    }
+    body.modal-open {
+      animation: none;
+      transform: none;
+    }
+
+    @keyframes pageLoadFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.5; transform:scale(.7); }
+    }
+    @keyframes slideIn {
+      from { opacity:0; transform:translateY(30px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 3rem; height:64px;
+      background:rgba(11,30,45,0.95);
+      backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border-on-dark);
+    }
+    .nav-logo { font-family:'Syne',sans-serif; font-weight:700; font-size:1.15rem; color:var(--white); letter-spacing:-0.02em; }
+    .nav-logo span { color:var(--accent); }
+    .nav-links { display:flex; gap:2.5rem; align-items:center; }
+    .nav-links a { font-size:.875rem; color:rgba(255,255,255,.65); text-decoration:none; transition:color .2s; }
+    .nav-links a:hover { color:var(--accent); }
+    .btn-nav {
+      padding:.5rem 1.5rem; background:var(--accent); color:var(--dark-bg);
+      border-radius:100px; font-weight:600; font-size:.875rem;
+      text-decoration:none; border:none; cursor:pointer; transition:all .2s;
+    }
+    .btn-nav:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(110,207,168,.3); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height:100vh; background:var(--dark-bg);
+      display:flex; flex-direction:column; justify-content:center; align-items:flex-start;
+      padding:8rem 3rem 5rem; position:relative; overflow:hidden;
+    }
+    .hero::before {
+      content:''; position:absolute; inset:0;
+      background:
+        radial-gradient(ellipse 60% 70% at 70% 50%,rgba(46,134,171,.2) 0%,transparent 70%),
+        radial-gradient(ellipse 40% 50% at 20% 80%,rgba(110,207,168,.12) 0%,transparent 60%);
+      pointer-events:none;
+    }
+    .hero-grid {
+      position:absolute; inset:0; pointer-events:none; opacity:.03;
+      background-image:linear-gradient(rgba(255,255,255,.8) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.8) 1px,transparent 1px);
+      background-size:60px 60px;
+    }
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:.5rem;
+      background:rgba(110,207,168,.12); border:1px solid rgba(110,207,168,.3);
+      border-radius:100px; padding:.35rem 1rem;
+      font-size:.8rem; color:var(--accent); letter-spacing:.05em; text-transform:uppercase; font-weight:500;
+      margin-bottom:1.75rem; animation:fadeUp .6s ease both;
+    }
+    .hero-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 2s infinite; }
+    .hero h1 {
+      font-family:'Syne',sans-serif; font-size:clamp(2.5rem,5vw,4.5rem);
+      font-weight:800; line-height:1.1; color:var(--white); letter-spacing:-.03em;
+      max-width:800px; animation:fadeUp .6s .1s ease both; z-index:1;
+    }
+    .hero h1 em { font-style:normal; color:var(--accent); }
+    .hero-sub {
+      margin-top:1.5rem; font-size:1.1rem; color:rgba(255,255,255,.6);
+      max-width:600px; line-height:1.7; font-weight:300;
+      animation:fadeUp .6s .2s ease both; z-index:1;
+    }
+    .hero-cta { margin-top:2.5rem; animation:fadeUp .6s .3s ease both; z-index:1; display:flex; gap:1rem; flex-wrap:wrap; }
+    .btn-primary {
+      padding:.95rem 2.5rem; border-radius:100px; background:var(--accent); color:var(--dark-bg);
+      font-weight:600; font-size:.95rem; text-decoration:none; border:none; cursor:pointer;
+      transition:all .2s; display:inline-block;
+    }
+    .btn-primary:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(110,207,168,.4); }
+    .btn-ghost {
+      padding:.95rem 2.5rem; border-radius:100px; background:transparent;
+      color:rgba(255,255,255,.8); font-weight:400; font-size:.95rem;
+      text-decoration:none; border:1px solid rgba(255,255,255,.2); cursor:pointer;
+      transition:all .2s; display:inline-block;
+    }
+    .btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
+
+    /* ── AUTH SECTION ── */
+    .auth-section { padding:5rem 3rem; background:linear-gradient(180deg,var(--dark-bg) 0%,var(--surface-dark) 100%); }
+    .auth-wrap { max-width:1100px; margin:0 auto; display:flex; gap:2rem; align-items:stretch; }
+    .auth-left {
+      flex:0 0 42%; background:rgba(255,255,255,.03); border:1px solid var(--border-on-dark);
+      padding:2.5rem; border-radius:20px; color:var(--white); display:flex; flex-direction:column; justify-content:center;
+    }
+    .auth-left-title { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:700; margin-bottom:.75rem; }
+    .auth-left-sub { font-size:.95rem; color:rgba(255,255,255,.55); line-height:1.7; margin-bottom:2rem; }
+    .auth-quote {
+      border-left:3px solid var(--accent); padding-left:1.25rem;
+      font-size:.9rem; color:rgba(255,255,255,.7); font-style:italic; line-height:1.7;
+    }
+    .auth-quote cite { display:block; margin-top:.5rem; color:var(--accent); font-style:normal; font-size:.8rem; }
+
+    .auth-right {
+      flex:1; background:var(--white); padding:2rem; border-radius:20px;
+      box-shadow:0 10px 40px rgba(11,30,45,.08); border:1px solid var(--border);
+    }
+    .auth-tabs {
+      display:flex; gap:0; background:var(--surface); padding:4px;
+      border-radius:100px; margin-bottom:1.5rem;
+    }
+    .auth-tab {
+      flex:1; border-radius:100px; border:none; background:transparent;
+      padding:.6rem 1rem; cursor:pointer; font-family:'DM Sans',sans-serif;
+      font-size:.875rem; font-weight:400; color:var(--text-muted); transition:all .2s;
+    }
+    .auth-tab.active {
+      background:var(--white); color:var(--text-primary);
+      font-weight:500; box-shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    .form-group { margin-bottom:1.1rem; }
+    .form-label { display:block; font-size:.78rem; font-weight:500; color:var(--text-muted); margin-bottom:.4rem; text-transform:uppercase; letter-spacing:.03em; }
+    .form-input {
+      width:100%; padding:.8rem 1rem; border:1.5px solid var(--border);
+      border-radius:12px; font-family:'DM Sans',sans-serif; font-size:.9rem;
+      color:var(--text-primary); background:var(--surface); outline:none; transition:all .2s;
+    }
+    .form-input:focus { border-color:var(--primary-light); box-shadow:0 0 0 3px rgba(46,134,171,.12); background:var(--white); }
+    .form-input::placeholder { color:var(--text-muted); opacity:.5; }
+    .btn-submit {
+      width:100%; padding:.9rem; background:var(--primary); color:var(--white);
+      border:none; border-radius:12px; font-size:.95rem; font-weight:600;
+      cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .2s; margin-top:.25rem;
+    }
+    .btn-submit:hover { background:var(--primary-light); transform:translateY(-1px); }
+    .role-btns { display:flex; gap:.5rem; margin-bottom:1rem; }
+    .role-btn {
+      flex:1; padding:.6rem; border-radius:10px; font-size:.85rem; cursor:pointer;
+      transition:all .2s; background:var(--surface); color:var(--text-muted);
+      border:1px solid var(--border); font-family:'DM Sans',sans-serif; font-weight:400;
+    }
+    .role-btn.active-role { background:var(--primary); color:var(--white); border-color:var(--primary); font-weight:600; }
+    .auth-guest-link { display:block; text-align:center; margin-top:1rem; font-size:.85rem; color:var(--text-muted); }
+    .auth-guest-link a { color:var(--primary); text-decoration:underline; cursor:pointer; }
+    .auth-error { display:none; margin-top:.75rem; font-size:.85rem; font-weight:600; color:#b44747; }
+    .auth-success { display:none; margin-top:.75rem; font-size:.85rem; font-weight:600; color:var(--primary); }
+
+    /* ── MODULES SECTION ── */
+    .modules-section { background:var(--surface); padding:6rem 3rem; }
+    .section-header { text-align:center; margin-bottom:3rem; }
+    .section-tag {
+      display:inline-block; font-size:.75rem; font-weight:500; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--primary);
+      background:rgba(26,107,138,.08); border-radius:100px; padding:.35rem 1rem; margin-bottom:1rem;
+    }
+    .section-title { font-family:'Syne',sans-serif; font-size:clamp(1.8rem,4vw,2.8rem); font-weight:800; color:var(--text-primary); letter-spacing:-.025em; line-height:1.2; margin-bottom:.75rem; }
+    .section-sub { font-size:1rem; color:var(--text-muted); max-width:500px; line-height:1.7; margin:0 auto; }
+    .modules-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:2rem; max-width:1200px; margin:0 auto; }
+    .module-card {
+      background:var(--white); border:1px solid rgba(30,51,68,.08);
+      border-radius:20px; overflow:hidden; transition:all .3s; cursor:pointer;
+    }
+    .module-card:hover { transform:translateY(-6px); border-color:rgba(110,207,168,.4); box-shadow:0 20px 50px rgba(110,207,168,.12); }
+    .module-cover { height:180px; display:flex; align-items:center; justify-content:center; position:relative; }
+    .module-cover.blue  { background:linear-gradient(135deg,#0B1E2D,#1A6B8A); }
+    .module-cover.teal  { background:linear-gradient(135deg,#0B2D24,#1A8A6B); }
+    .module-cover.purple{ background:linear-gradient(135deg,#1A0B2D,#5A1A8A); }
+    .module-cover-icon { font-size:3.5rem; opacity:.9; }
+    .module-badge { position:absolute; top:1rem; right:1rem; padding:.35rem .85rem; border-radius:100px; font-size:.7rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; }
+    .badge-available { background:var(--accent); color:var(--dark-bg); }
+    .badge-soon { background:rgba(255,255,255,.15); color:rgba(255,255,255,.7); }
+    .module-body { padding:1.75rem; }
+    .module-title { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text-primary); margin-bottom:.6rem; }
+    .module-desc { font-size:.875rem; color:var(--text-muted); line-height:1.7; }
+    .module-footer { display:flex; align-items:center; justify-content:space-between; margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--border); }
+    .module-progress { font-size:.75rem; color:var(--text-muted); }
+    .module-arrow { width:30px; height:30px; border-radius:50%; background:rgba(26,107,138,.08); display:flex; align-items:center; justify-content:center; color:var(--primary); font-size:.9rem; transition:all .2s; }
+    .module-card:hover .module-arrow { transform:translate(3px,-3px); background:rgba(26,107,138,.15); }
+
+    /* ── ABOUT SECTION ── */
+    .about-section { background:var(--white); padding:6rem 3rem; }
+    .about-container { max-width:900px; margin:0 auto; }
+    .about-title { font-family:'Syne',sans-serif; font-size:clamp(1.8rem,3.5vw,2.6rem); font-weight:800; color:var(--text-primary); margin-bottom:1.5rem; letter-spacing:-.025em; }
+    .about-intro { font-size:1.05rem; color:var(--text-muted); line-height:1.8; margin-bottom:3rem; }
+    .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:3rem; }
+    .about-bio { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.75rem; }
+    .bio-name { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:700; color:var(--accent); margin-bottom:.3rem; }
+    .bio-dates { font-size:.85rem; color:var(--text-muted); margin-bottom:1rem; }
+    .bio-text { font-size:.9rem; color:var(--text-muted); line-height:1.8; }
+    .about-blockquote { border-left:4px solid var(--accent); border-radius:0 12px 12px 0; padding:1.75rem; margin:2rem 0; background:rgba(110,207,168,.06); }
+    .blockquote-text { font-size:1.1rem; color:var(--text-primary); font-style:italic; line-height:1.8; margin-bottom:.75rem; }
+    .blockquote-author { font-size:.85rem; color:var(--accent); font-weight:500; }
+    .science-highlight { background:rgba(26,107,138,.06); border:1px solid rgba(26,107,138,.12); border-radius:12px; padding:1.5rem; }
+    .science-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; color:var(--primary); margin-bottom:.75rem; text-transform:uppercase; letter-spacing:.05em; }
+    .science-text { font-size:.9rem; color:var(--text-muted); line-height:1.7; }
+
+    /* ── FOOTER ── */
+    footer { background:var(--dark-bg); padding:3rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:2rem; }
+    .footer-brand { font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem; color:var(--white); }
+    .footer-brand span { color:var(--accent); }
+    .footer-text { font-size:.8rem; color:rgba(255,255,255,.35); }
+
+    /* ── RESTRICTED BANNER ── */
+    .restricted-banner { display:none; background:rgba(110,207,168,.12); border-bottom:1px solid var(--border-on-dark); padding:1rem 3rem; text-align:center; color:var(--accent); font-size:.9rem; font-weight:500; }
+    .restricted-banner.active { display:block; }
+
+    /* ── ADMIN MODAL ── */
+    .modal-overlay {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
+      z-index:9999; align-items:flex-start; justify-content:center; backdrop-filter:blur(4px);
+      overflow-y:auto; padding:1rem;
+    }
+    .modal-overlay.active { display:block; }
+    .modal-overlay.active .modal-box {
+      position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+      max-height:calc(100dvh - 2rem); overflow-y:auto; margin:0; animation:none;
+      z-index:10000;
+    }
+    .modal-box {
+      background:var(--white); border-radius:20px; padding:2.5rem;
+      max-width:420px; width:90%; box-shadow:0 30px 80px rgba(0,0,0,.3);
+      animation:slideIn .35s ease both; position:relative;
+    }
+    .modal-title { font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:700; color:var(--text-primary); margin-bottom:.4rem; }
+    .modal-sub { font-size:.9rem; color:var(--text-muted); margin-bottom:1.75rem; }
+    .btn-close {
+      position:absolute; top:1.25rem; right:1.25rem;
+      background:none; border:none; font-size:1.3rem; color:var(--text-muted); cursor:pointer; transition:color .2s; line-height:1;
+    }
+    .btn-close:hover { color:var(--text-primary); }
+    .demo-note { background:rgba(110,207,168,.08); border:1px solid rgba(110,207,168,.2); border-left:3px solid var(--accent); border-radius:8px; padding:.75rem 1rem; font-size:.8rem; color:var(--primary); margin:1rem 0; }
+
+    /* ── DEMO MODAL ── */
+    .demo-modal-box { max-width:560px; width:min(560px, calc(100vw - 2rem)); max-height:calc(100dvh - 2rem); overflow-y:auto; }
+    .demo-modal-header { text-align:center; margin-bottom:2rem; }
+    .demo-modal-icon { font-size:2.5rem; margin-bottom:.75rem; }
+    .demo-modal-header h2 { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:700; color:var(--text-primary); margin-bottom:.4rem; }
+    .demo-modal-header p { font-size:.9rem; color:var(--text-muted); }
+    .demo-profiles { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .demo-profile-card {
+      border:1.5px solid var(--border); border-radius:16px; padding:1.5rem;
+      text-align:center; cursor:pointer; transition:all .25s;
+    }
+    .demo-profile-card:hover { border-color:var(--accent); transform:translateY(-3px); box-shadow:0 10px 30px rgba(110,207,168,.12); }
+    .demo-avatar {
+      width:56px; height:56px; border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--primary));
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; color:var(--dark-bg); font-size:1.1rem;
+      margin:0 auto 1rem;
+    }
+    .demo-profile-name { font-family:'Syne',sans-serif; font-weight:700; color:var(--text-primary); font-size:.95rem; margin-bottom:.25rem; }
+    .demo-profile-role { font-size:.75rem; color:var(--accent); font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-bottom:1rem; }
+    .demo-creds { background:var(--surface); border-radius:8px; padding:.6rem .75rem; margin-bottom:1rem; }
+    .demo-creds span { display:block; font-size:.75rem; color:var(--text-muted); font-family:monospace; line-height:1.6; }
+    .btn-demo-access {
+      width:100%; padding:.6rem; background:var(--primary); color:var(--white);
+      border:none; border-radius:10px; font-size:.85rem; font-weight:600;
+      cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .2s;
+    }
+    .btn-demo-access:hover { background:var(--primary-light); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:900px){
+      nav { padding:0 1.5rem; }
+      .hero { padding:6rem 1.5rem 4rem; }
+      .auth-section { padding:4rem 1.5rem; }
+      .auth-wrap { flex-direction:column; }
+      .auth-left { flex:none; }
+      .modules-section,.about-section { padding:4rem 1.5rem; }
+      .about-grid { grid-template-columns:1fr; }
+      footer { flex-direction:column; text-align:center; }
+      .demo-profiles { grid-template-columns:1fr; }
+    }
+    @media(max-width:600px){
+      nav { padding:0 1rem; height:56px; }
+      .nav-links a:not(.btn-nav){ display:none; }
+      .hero { padding:5rem 1rem 3rem; }
+      .hero h1 { font-size:2rem; }
+      .auth-wrap { gap:1.5rem; }
+      .modal-overlay.active .modal-box { top:1rem; transform:translateX(-50%); }
+      .modal-box { padding:1.5rem; border-radius:16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="restricted-banner" id="restrictedBanner">
+  ✨ Mode Invité activé — Navigation limitée. <strong>Connectez-vous</strong> pour accès complet.
+</div>
+
+<nav>
+  <div class="nav-logo">Nova<span>Soins</span> Infirmiers</div>
+  <div class="nav-links">
+    <a href="#modules">Modules</a>
+    <a href="#about">À propos</a>
+    <a href="#auth" class="btn-nav">Commencer</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-grid"></div>
+  <div class="hero-badge">Plateforme de formation paramédicale</div>
+  <h1>Soins <em>non médicamenteux</em><br>en oncologie</h1>
+  <p class="hero-sub">Une plateforme dédiée aux infirmiers pour maîtriser l'hypnose conversationnelle, l'acupuncture et la musicothérapie — vidéos, techniques et checklists pratiques.</p>
+  <div class="hero-cta">
+    <a href="#auth" class="btn-primary">Commencer l'expérience</a>
+    <a href="#modules" class="btn-ghost">Voir les modules</a>
+  </div>
+</section>
+
+<!-- AUTH SECTION -->
+<section class="auth-section" id="auth">
+  <div class="auth-wrap">
+    <div class="auth-left">
+      <div class="auth-left-title">NovaSoins Infirmiers</div>
+      <div class="auth-left-sub">Plateforme d'apprentissage clinique dédiée aux professionnels paramédicaux en oncologie.</div>
+      <div class="auth-quote">
+        <em>« L'alliance thérapeutique commence par l'écoute, le respect et la transparence. »</em>
+        <cite>— NovaSoins Infirmiers</cite>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab(this,'login')">Se connecter</button>
+        <button class="auth-tab" onclick="switchTab(this,'register')">S'inscrire</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="login-form">
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Adresse e-mail</label>
+            <input class="form-input" type="email" id="loginEmail" placeholder="vous@exemple.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mot de passe</label>
+            <input class="form-input" type="password" id="loginPassword" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn-submit">Se connecter</button>
+        </form>
+        <p class="auth-error" id="login-error"></p>
+        <p class="auth-guest-link">ou <a onclick="openDemoModal()">Continuer sans compte →</a></p>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="register-form" style="display:none">
+        <div class="role-btns">
+          <button id="roleLearnerBtn" class="role-btn active-role" onclick="switchRole(this,'learner')">Infirmier(e)</button>
+          <button id="roleTrainerBtn" class="role-btn" onclick="switchRole(this,'trainer')">Formateur</button>
+        </div>
+        <form onsubmit="handleRegister(event)">
+          <div id="fields-learner">
+            <div class="form-group"><label class="form-label">Nom complet</label><input class="form-input" placeholder="Sara Benali"></div>
+            <div class="form-group"><label class="form-label">Service</label><input class="form-input" placeholder="Oncologie"></div>
+            <div class="form-group"><label class="form-label">Années d'expérience</label><input class="form-input" type="number" placeholder="4"></div>
+          </div>
+          <div id="fields-trainer" style="display:none">
+            <div class="form-group"><label class="form-label">Nom complet</label><input class="form-input" placeholder="Prof. Dr. Rahmouni"></div>
+            <div class="form-group"><label class="form-label">Spécialité</label><input class="form-input" placeholder="Oncologie"></div>
+            <div class="form-group"><label class="form-label">Lieu de travail</label><input class="form-input" placeholder="Hôpital Central"></div>
+          </div>
+          <div class="form-group"><label class="form-label">E-mail</label><input class="form-input" placeholder="vous@exemple.com"></div>
+          <div class="form-group"><label class="form-label">Mot de passe</label><input class="form-input" type="password" placeholder="••••••••"></div>
+          <button type="submit" class="btn-submit">Créer mon compte</button>
+        </form>
+        <p class="auth-error" id="register-error"></p>
+        <p class="auth-success" id="register-success"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULES -->
+<section class="modules-section" id="modules">
+  <div class="section-header">
+    <span class="section-tag">Nos Formations</span>
+    <h2 class="section-title">Interventions Non Médicamenteuses</h2>
+    <p class="section-sub">Trois approches complémentaires pour améliorer le vécu des patients en oncologie.</p>
+  </div>
+  <div class="modules-grid">
+    <div class="module-card" onclick="goToModule('hypnose')">
+      <div class="module-cover blue">
+        <div class="module-cover-icon">🧠</div>
+        <span class="module-badge badge-available">Disponible</span>
+      </div>
+      <div class="module-body">
+        <h3 class="module-title">Hypnose Conversationnelle</h3>
+        <p class="module-desc">Guider l'inconscient via le langage naturel — réduire l'anxiété, la douleur et les insomnies sans transe formelle.</p>
+        <div class="module-footer">
+          <span class="module-progress">42% complété</span>
+          <div class="module-arrow">→</div>
+        </div>
+      </div>
+    </div>
+    <div class="module-card">
+      <div class="module-cover teal">
+        <div class="module-cover-icon">🌿</div>
+        <span class="module-badge badge-soon">Bientôt</span>
+      </div>
+      <div class="module-body">
+        <h3 class="module-title">Acupuncture</h3>
+        <p class="module-desc">Stimulation des points énergétiques pour soulager les effets secondaires des traitements oncologiques.</p>
+        <div class="module-footer">
+          <span class="module-progress">En préparation</span>
+          <div class="module-arrow" style="opacity:.4">→</div>
+        </div>
+      </div>
+    </div>
+    <div class="module-card">
+      <div class="module-cover purple">
+        <div class="module-cover-icon">🎵</div>
+        <span class="module-badge badge-soon">Bientôt</span>
+      </div>
+      <div class="module-body">
+        <h3 class="module-title">Musicothérapie</h3>
+        <p class="module-desc">Utiliser la musique comme outil thérapeutique pour accompagner les soins et améliorer le bien-être.</p>
+        <div class="module-footer">
+          <span class="module-progress">En préparation</span>
+          <div class="module-arrow" style="opacity:.4">→</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about-section" id="about">
+  <div class="about-container">
+    <h2 class="about-title">Fondements Scientifiques & Historiques</h2>
+    <p class="about-intro">L'hypnose conversationnelle repose sur des décennies de recherche et d'innovations dans le domaine paramédicale, combinant la rigueur scientifique avec une approche humaine et bienveillante.</p>
+    <div class="about-grid">
+      <div class="about-bio">
+        <div class="bio-name">Milton Erickson</div>
+        <div class="bio-dates">1901 — 1980</div>
+        <p class="bio-text">Psychiatre et psychologue américain, Milton Erickson a révolutionné l'hypnothérapie en développant l'hypnose éricksonnienne. Ses techniques de langage indirect et d'utilisation thérapeutique des métaphores ont ouvert des voies nouvelles pour le traitement de la douleur chronique et de l'anxiété.</p>
+      </div>
+      <div class="about-bio">
+        <div class="bio-name">Approche Intégrative</div>
+        <div class="bio-dates">XXIe Siècle</div>
+        <p class="bio-text">Les avancées modernes en neurosciences ont confirmé l'efficacité de l'hypnose conversationnelle. Les infirmiers exploitent désormais ces découvertes pour offrir des soins plus humains, réduisant la pharmacodépendance et améliorant la qualité de vie des patients atteints de cancer.</p>
+      </div>
+    </div>
+    <div class="about-blockquote">
+      <p class="blockquote-text">« La meilleure thérapie est celle que le patient applique lui-même. »</p>
+      <p class="blockquote-author">— Milton Erickson</p>
+    </div>
+    <div class="science-highlight">
+      <h3 class="science-title">📊 Preuves Scientifiques</h3>
+      <p class="science-text">Les études en imagerie cérébrale (fMRI) démontrent que l'hypnose conversationnelle modifie l'activité du cortex cingulaire antérieur, réduisant la perception de la douleur et de l'anxiété. Une méta-analyse de 73 études (2019) conclut que l'hypnothérapie réduit significativement la douleur post-opératoire (p &lt; 0.001) et améliore la récupération chez les patients oncologiques.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>
+    <div class="footer-brand">Nova<span>Soins</span> Infirmiers</div>
+    <p class="footer-text" style="margin-top:.5rem">Plateforme de formation paramédicale — Projet de Fin d'Études</p>
+  </div>
+  <p class="footer-text">© 2025 NovaSoins — Tous droits réservés</p>
+</footer>
+
+<!-- ADMIN MODAL -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-box">
+    <button class="btn-close" onclick="closeModal('adminModal')">✕</button>
+    <h2 class="modal-title">Espace Admin</h2>
+    <p class="modal-sub">Connexion sécurisée administrateur</p>
+    <form onsubmit="handleAdminLogin(event)">
+      <div class="form-group"><label class="form-label">Identifiant</label><input type="text" class="form-input" id="adminEmail" placeholder="admin@novasoins.fr" required></div>
+      <div class="form-group"><label class="form-label">Mot de passe</label><input type="password" class="form-input" id="adminPass" placeholder="••••••••" required></div>
+      <div class="demo-note"><strong>Démo :</strong> admin@novasoins.fr / admin2025</div>
+      <button type="submit" class="btn-submit">Accéder</button>
+    </form>
+    <p class="auth-error" id="admin-error"></p>
+    <p class="auth-success" id="admin-success"></p>
+  </div>
+</div>
+
+<!-- DEMO MODAL -->
+<div class="modal-overlay" id="demoModal">
+  <div class="modal-box demo-modal-box">
+    <button class="btn-close" onclick="closeModal('demoModal')">✕</button>
+    <div class="demo-modal-header">
+      <div class="demo-modal-icon">🎓</div>
+      <h2>Accès Démonstration</h2>
+      <p>Choisissez un profil pour explorer la plateforme</p>
+    </div>
+    <div class="demo-profiles">
+      <div class="demo-profile-card">
+        <div class="demo-avatar">SB</div>
+        <div class="demo-profile-name">Sara Benali</div>
+        <div class="demo-profile-role">Infirmier(e)</div>
+        <div class="demo-creds">
+          <span>learner@novasoins.fr</span>
+          <span>learner2025</span>
+        </div>
+        <button class="btn-demo-access" onclick="accessAs('learner')">Accéder →</button>
+      </div>
+      <div class="demo-profile-card">
+        <div class="demo-avatar" style="background:linear-gradient(135deg,#1A6B8A,#2E86AB);color:#fff">DR</div>
+        <div class="demo-profile-name">Prof. Dr. Rahmouni</div>
+        <div class="demo-profile-role">Formateur</div>
+        <div class="demo-creds">
+          <span>trainer@novasoins.fr</span>
+          <span>trainer2025</span>
+        </div>
+        <button class="btn-demo-access" onclick="accessAs('trainer')">Accéder →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const USERS = [
+    { email:'learner@novasoins.fr', password:'learner2025', role:'learner', name:'Sara Benali',       service:'Oncologie',  redirect:'learner.html' },
+    { email:'trainer@novasoins.fr', password:'trainer2025', role:'trainer', name:'Prof. Dr. Rahmouni',service:'Formation',  redirect:'trainer.html' },
+    { email:'admin@novasoins.fr',   password:'admin2025',   role:'admin',   name:'Admin',             service:'',           redirect:'' }
+  ];
+
+  function saveUser(u){
+    try{
+      localStorage.setItem('novasoins_user', JSON.stringify({ name:u.name, role:u.role, service:u.service }));
+    }catch(e){}
+  }
+
+  /* ── TAB SWITCHING ── */
+  function switchTab(btn, tab){
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('login-form').style.display    = tab==='login'    ? 'block' : 'none';
+    document.getElementById('register-form').style.display = tab==='register' ? 'block' : 'none';
+  }
+  function switchRole(btn, role){
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active-role'));
+    btn.classList.add('active-role');
+    document.getElementById('fields-learner').style.display = role==='learner' ? 'block' : 'none';
+    document.getElementById('fields-trainer').style.display = role==='trainer' ? 'block' : 'none';
+  }
+
+  /* ── LOGIN ── */
+  function handleLogin(e){
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass  = document.getElementById('loginPassword').value;
+    const err   = document.getElementById('login-error');
+    err.style.display = 'none';
+    const user  = USERS.find(u => u.email.toLowerCase()===email.toLowerCase() && u.password===pass);
+    if(!user){ err.textContent='Identifiants invalides — vérifiez votre e-mail et mot de passe.'; err.style.display='block'; return; }
+    if(user.role==='admin'){ document.getElementById('adminModal').classList.add('active'); return; }
+    saveUser(user);
+    window.location.href = user.redirect;
+  }
+
+  /* ── REGISTER (simulated) ── */
+  function handleRegister(e){
+    e.preventDefault();
+    const suc = document.getElementById('register-success');
+    suc.textContent = 'Inscription simulée — redirection en cours...';
+    suc.style.display = 'block';
+    saveUser({ name:'Sara Benali', role:'learner', service:'Oncologie' });
+    setTimeout(()=> window.location.href='learner.html', 900);
+  }
+
+  /* ── ADMIN LOGIN ── */
+  function handleAdminLogin(e){
+    e.preventDefault();
+    const email = document.getElementById('adminEmail').value.trim();
+    const pass  = document.getElementById('adminPass').value;
+    const err   = document.getElementById('admin-error');
+    const suc   = document.getElementById('admin-success');
+    err.style.display='none'; suc.style.display='none';
+    if(email==='admin@novasoins.fr' && pass==='admin2025'){
+      suc.textContent='✅ Connexion réussie — interface admin (simulée).';
+      suc.style.display='block';
+      setTimeout(()=>{ closeModal('adminModal'); suc.style.display='none'; }, 1200);
+    } else {
+      err.textContent='Identifiants invalides.'; err.style.display='block';
+    }
+  }
+
+  /* ── DEMO MODAL ── */
+  function openDemoModal() {
+    const modal = document.getElementById('demoModal');
+    document.body.classList.add('modal-open');
+    modal.classList.add('active');
+    modal.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+  }
+  function accessAs(role){
+    const user = USERS.find(u=>u.role===role);
+    saveUser(user);
+    window.location.href = user.redirect;
+  }
+
+  /* ── MODULES ── */
+  function goToModule(m){ if(m==='hypnose') openDemoModal(); }
+
+  /* ── CLOSE MODALS ON BACKDROP ── */
+  document.querySelectorAll('.modal-overlay').forEach(el=>{
+    el.addEventListener('click', e=>{ if(e.target===el) closeModal(el.id); });
+  });
+
+  /* ── SMOOTH SCROLL ── */
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      e.preventDefault();
+      const t=document.querySelector(a.getAttribute('href'));
+      if(t) t.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+</script>
+</body>
+</html>

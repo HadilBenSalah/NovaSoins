@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaSoins — Tableau de Bord Formateur</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --dark-bg:#0B1E2D; --surface-dark:#112534;
+      --primary:#1A6B8A; --primary-light:#2E86AB;
+      --accent:#6ECFA8;  --accent-soft:#C8F0E0;
+      --surface:#F4F8FA; --white:#ffffff;
+      --text-primary:#1E3344; --text-muted:#6B8A9A;
+      --border:rgba(30,51,68,0.1);
+      --border-on-dark:rgba(110,207,168,0.12);
+    }
+
+    html{scroll-behavior:smooth}
+
+    body{
+      font-family:'DM Sans',sans-serif;
+      background:var(--surface);
+      color:var(--text-primary);
+      overflow-x:hidden;
+      animation:fadeLoad .5s ease both;
+    }
+
+    @keyframes fadeLoad{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+    /* ── HEADER ── */
+    .header{
+      position:fixed;top:0;left:0;right:0;height:68px;
+      background:rgba(11,30,45,0.98);
+      border-bottom:1px solid var(--border-on-dark);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 2rem;z-index:100;backdrop-filter:blur(16px);
+    }
+    .header-logo{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--white);letter-spacing:-.02em}
+    .header-logo span{color:var(--accent)}
+    .header-right{display:flex;align-items:center;gap:1.5rem}
+    .nav-links{display:flex;gap:1.5rem;align-items:center}
+    .nav-links a{font-size:.85rem;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s}
+    .nav-links a:hover{color:var(--accent)}
+    .trainer-profile{display:flex;align-items:center;gap:.75rem;border-left:1px solid var(--border-on-dark);padding-left:1.5rem}
+    .trainer-info{text-align:right}
+    .trainer-name{font-size:.875rem;font-weight:600;color:var(--white)}
+    .trainer-role{font-size:.7rem;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+    .trainer-avatar{
+      width:40px;height:40px;border-radius:50%;
+      background:linear-gradient(135deg,var(--primary),var(--primary-light));
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:var(--white);font-size:.85rem;flex-shrink:0;
+    }
+    .btn-logout{
+      padding:.4rem 1rem;background:transparent;color:rgba(255,255,255,.6);
+      border:1px solid rgba(255,255,255,.15);border-radius:100px;
+      font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;
+      transition:all .2s;text-decoration:none;
+    }
+    .btn-logout:hover{border-color:var(--accent);color:var(--accent)}
+
+    /* ── LAYOUT ── */
+    .main-content{
+      margin-top:68px;
+      padding:2.5rem 3rem;
+      max-width:1300px;
+      margin-left:auto;
+      margin-right:auto;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header{margin-bottom:2.5rem}
+    .page-tag{
+      display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--primary);
+      background:rgba(26,107,138,.08);border-radius:100px;
+      padding:.3rem .85rem;margin-bottom:.75rem;
+    }
+    .page-title{
+      font-family:'Syne',sans-serif;font-size:clamp(1.6rem,3vw,2.2rem);
+      font-weight:800;color:var(--text-primary);letter-spacing:-.025em;margin-bottom:.4rem;
+    }
+    .page-subtitle{font-size:.95rem;color:var(--text-muted)}
+
+    /* ── SECTION HEADER ── */
+    .section-heading{
+      display:flex;align-items:center;gap:.6rem;
+      font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;
+      color:var(--text-primary);margin-bottom:1.5rem;
+    }
+    .section-heading-icon{font-size:1.3rem}
+
+    /* ── STATS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-bottom:3rem}
+    .stat-card{
+      background:var(--white);border:1px solid var(--border);border-radius:16px;
+      padding:1.5rem;display:flex;flex-direction:column;gap:.5rem;
+      transition:all .25s;
+    }
+    .stat-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(26,107,138,.08);border-color:rgba(110,207,168,.3)}
+    .stat-icon{
+      width:40px;height:40px;border-radius:10px;background:rgba(26,107,138,.08);
+      display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+    }
+    .stat-value{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--primary);line-height:1}
+    .stat-label{font-size:.8rem;color:var(--text-muted);font-weight:500}
+    .stat-trend{font-size:.75rem;color:var(--accent);font-weight:500}
+
+    /* ── MODULE STATUS ── */
+    .modules-status{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;margin-bottom:3rem}
+    .module-status-card{
+      background:var(--white);border:1px solid var(--border);border-radius:16px;overflow:hidden;
+      transition:all .25s;
+    }
+    .module-status-card:hover{box-shadow:0 8px 24px rgba(26,107,138,.08)}
+    .module-status-header{height:80px;display:flex;align-items:center;padding:0 1.5rem;gap:1rem}
+    .module-status-header.blue  {background:linear-gradient(135deg,#0B1E2D,#1A6B8A)}
+    .module-status-header.teal  {background:linear-gradient(135deg,#0B2D24,#1A8A6B)}
+    .module-status-header.purple{background:linear-gradient(135deg,#1A0B2D,#5A1A8A)}
+    .module-status-icon{font-size:1.75rem}
+    .module-status-name{font-family:'Syne',sans-serif;font-weight:700;color:var(--white);font-size:1rem}
+    .module-status-body{padding:1.25rem 1.5rem}
+    .status-badge{
+      display:inline-flex;align-items:center;gap:.4rem;
+      padding:.3rem .75rem;border-radius:100px;font-size:.72rem;font-weight:600;
+      margin-bottom:.75rem;
+    }
+    .status-active{background:rgba(110,207,168,.15);color:var(--primary)}
+    .status-wip{background:rgba(107,138,154,.1);color:var(--text-muted)}
+    .status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+    .module-stats-row{display:flex;gap:1.5rem}
+    .module-stat-item{font-size:.78rem;color:var(--text-muted)}
+    .module-stat-item strong{display:block;font-size:1rem;font-weight:700;color:var(--text-primary)}
+
+    /* ── CASE GENERATOR ── */
+    .generator-card{
+      background:var(--white);border:1px solid var(--border);border-radius:20px;
+      overflow:hidden;margin-bottom:3rem;
+    }
+    .generator-header{
+      background:linear-gradient(135deg,var(--dark-bg),var(--primary));
+      padding:2rem 2.5rem;display:flex;align-items:center;gap:1rem;
+    }
+    .generator-header-icon{font-size:2rem}
+    .generator-header-text h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;color:var(--white)}
+    .generator-header-text p{font-size:.85rem;color:rgba(255,255,255,.6);margin-top:.2rem}
+    .ai-badge{
+      margin-left:auto;padding:.35rem .85rem;
+      background:rgba(110,207,168,.15);border:1px solid rgba(110,207,168,.3);
+      border-radius:100px;font-size:.72rem;font-weight:600;color:var(--accent);
+      display:flex;align-items:center;gap:.4rem;white-space:nowrap;
+    }
+    .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+    .generator-form{padding:2rem 2.5rem;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:1rem;align-items:end;border-bottom:1px solid var(--border)}
+    .form-group{display:flex;flex-direction:column;gap:.4rem}
+    .form-label{font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
+    .form-select{
+      padding:.8rem 1rem;border:1.5px solid var(--border);border-radius:12px;
+      font-family:'DM Sans',sans-serif;font-size:.875rem;color:var(--text-primary);
+      background:var(--surface);outline:none;transition:all .2s;cursor:pointer;
+      appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B8A9A' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right .9rem center;padding-right:2.5rem;
+    }
+    .form-select:focus{border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(46,134,171,.1);background-color:var(--white)}
+    .btn-generate{
+      padding:.8rem 1.75rem;background:var(--primary);color:var(--white);
+      border:none;border-radius:12px;font-size:.9rem;font-weight:600;
+      cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;
+      white-space:nowrap;
+    }
+    .btn-generate:hover:not(:disabled){background:var(--primary-light);transform:translateY(-1px)}
+    .btn-generate:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .generate-error{
+      display:none;margin:0 2.5rem 1.5rem;padding:.75rem 1rem;
+      border-radius:10px;font-size:.85rem;color:#b44747;
+      background:rgba(180,71,71,.08);border:1px solid rgba(180,71,71,.2);
+    }
+
+    /* ── LOADING ── */
+    .loading-container{
+      display:none;flex-direction:column;align-items:center;justify-content:center;
+      padding:4rem 2rem;gap:1rem;
+    }
+    .loading-container.active{display:flex}
+    .loading-spinner{
+      width:44px;height:44px;border:3px solid var(--accent-soft);
+      border-top-color:var(--primary);border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+    .loading-text{font-size:.9rem;color:var(--text-muted);animation:pulse 1.5s infinite}
+    .loading-sub{font-size:.78rem;color:var(--text-muted);opacity:.6}
+
+    /* ── CASE STUDY CARD ── */
+    .case-study-container{display:none;animation:fadeIn .4s ease both}
+    .case-study-container.active{display:block}
+    .case-study-inner{padding:2rem 2.5rem}
+    .case-study-title-bar{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;
+    }
+    .case-study-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text-primary)}
+    .case-title-actions{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:flex-end}
+    .case-id-badge{
+      padding:.35rem .85rem;background:rgba(26,107,138,.08);
+      border-radius:100px;font-size:.72rem;font-weight:600;color:var(--primary);
+      font-family:monospace;
+    }
+    .btn-case-action{
+      border:1px solid var(--border);background:var(--white);color:var(--text-primary);
+      border-radius:100px;padding:.45rem .85rem;font-family:'DM Sans',sans-serif;
+      font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;
+    }
+    .btn-case-action:hover{border-color:var(--primary-light);color:var(--primary);background:var(--surface)}
+    .case-meta-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem}
+    .meta-pill{
+      padding:.3rem .85rem;border-radius:100px;font-size:.75rem;font-weight:500;
+      background:var(--surface);border:1px solid var(--border);color:var(--text-muted);
+      display:flex;align-items:center;gap:.4rem;
+    }
+    .meta-pill strong{color:var(--text-primary);font-weight:600}
+    .case-section{margin-bottom:1.5rem}
+    .case-section-title{
+      font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+      color:var(--primary);margin-bottom:.75rem;
+    }
+    .case-context{
+      background:var(--surface);border:1px solid var(--border);border-radius:12px;
+      padding:1.25rem;font-size:.875rem;color:var(--text-muted);line-height:1.7;
+    }
+    .dialog-block{display:flex;flex-direction:column;gap:.75rem}
+    .dialog-item{border-radius:12px;padding:1rem 1.25rem;border:1px solid var(--border)}
+    .dialog-item.nurse{background:rgba(26,107,138,.04);border-color:rgba(26,107,138,.15)}
+    .dialog-item.patient{background:var(--surface)}
+    .dialog-speaker{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);margin-bottom:.4rem}
+    .dialog-item.patient .dialog-speaker{color:var(--text-muted)}
+    .dialog-text{font-size:.875rem;color:var(--text-primary);line-height:1.6}
+    .eval-list{display:flex;flex-direction:column;gap:.6rem}
+    .eval-item{display:flex;align-items:flex-start;gap:.75rem;font-size:.875rem;color:var(--text-muted);padding:.6rem;background:var(--surface);border-radius:8px}
+    .eval-check{color:var(--accent);font-weight:700;flex-shrink:0}
+    .questions-block{display:flex;flex-direction:column;gap:.75rem}
+    .question-item{
+      padding:.85rem 1rem;background:var(--surface);border-radius:10px;
+      font-size:.875rem;color:var(--text-muted);line-height:1.6;
+      border-left:3px solid var(--accent);
+    }
+    .patient-name-display{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--primary);margin-bottom:.25rem}
+
+    /* ── COMMUNITY FEED ── */
+    .feed-section{margin-bottom:3rem}
+    .feed-compose{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:1.25rem}
+    .feed-compose-top{display:flex;gap:.75rem;align-items:flex-start;margin-bottom:.75rem}
+    .compose-avatar{
+      width:38px;height:38px;border-radius:50%;
+      background:linear-gradient(135deg,var(--primary),var(--primary-light));
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:var(--white);font-size:.8rem;flex-shrink:0;
+    }
+    .compose-textarea{
+      flex:1;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:12px;
+      font-family:'DM Sans',sans-serif;font-size:.875rem;color:var(--text-primary);
+      resize:none;outline:none;min-height:80px;transition:border-color .2s;background:var(--surface);
+    }
+    .compose-textarea:focus{border-color:var(--primary-light);background:var(--white)}
+    .compose-textarea::placeholder{color:var(--text-muted);opacity:.6}
+    .compose-footer{display:flex;align-items:center;justify-content:space-between}
+    .compose-hint{font-size:.75rem;color:var(--text-muted)}
+    .btn-post{
+      padding:.6rem 1.5rem;background:var(--primary);color:var(--white);
+      border:none;border-radius:100px;font-size:.85rem;font-weight:600;
+      cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;
+    }
+    .btn-post:hover{background:var(--primary-light);transform:translateY(-1px)}
+    .feed-list{display:flex;flex-direction:column;gap:1rem}
+    .post-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:1.25rem;transition:box-shadow .2s}
+    .post-card:hover{box-shadow:0 4px 16px rgba(26,107,138,.06)}
+    .post-header{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+    .post-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0}
+    .av-learner{background:linear-gradient(135deg,var(--accent),var(--primary));color:var(--dark-bg)}
+    .av-trainer{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:var(--white)}
+    .post-meta{flex:1}
+    .post-author{font-size:.9rem;font-weight:600;color:var(--text-primary)}
+    .post-sub{display:flex;align-items:center;gap:.5rem;margin-top:.15rem}
+    .role-pill{
+      padding:.1rem .5rem;border-radius:100px;font-size:.65rem;font-weight:600;
+      text-transform:uppercase;letter-spacing:.04em;
+    }
+    .pill-learner{background:var(--accent-soft);color:var(--primary)}
+    .pill-trainer{background:rgba(26,107,138,.1);color:var(--primary)}
+    .post-time{font-size:.75rem;color:var(--text-muted)}
+    .post-content{font-size:.875rem;color:var(--text-muted);line-height:1.75;margin-bottom:.85rem}
+    .post-footer{display:flex;align-items:center;gap:1rem;padding-top:.75rem;border-top:1px solid var(--border)}
+    .btn-like{
+      display:flex;align-items:center;gap:.4rem;background:none;border:none;
+      font-size:.8rem;color:var(--text-muted);cursor:pointer;
+      font-family:'DM Sans',sans-serif;padding:.3rem .6rem;border-radius:8px;transition:all .2s;
+    }
+    .btn-like:hover,.btn-like.liked{color:#e74c3c}
+    .btn-like.liked{background:rgba(231,76,60,.06)}
+    .btn-action {
+      display: flex; align-items: center; gap: .4rem;
+      background: none; border: none; font-size: .8rem;
+      color: var(--text-muted); cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      padding: .3rem .6rem; border-radius: 8px; transition: all .2s;
+    }
+    .btn-action:hover { background: var(--surface); color: var(--text-primary); }
+    .btn-delete:hover { background: rgba(231,76,60,.08); color: #e74c3c; }
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      background: var(--dark-bg); color: var(--white);
+      padding: .75rem 1.5rem; border-radius: 100px;
+      font-size: .875rem; z-index: 999;
+      opacity: 0; transition: opacity .3s; pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+    .post-comments{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+    .comment-list{display:flex;flex-direction:column;gap:.65rem;margin-bottom:.8rem}
+    .comment-item{background:var(--surface);border-radius:10px;padding:.65rem .75rem}
+    .comment-head{display:flex;align-items:center;gap:.45rem;margin-bottom:.2rem;font-size:.75rem}
+    .comment-author{font-weight:700;color:var(--text-primary)}
+    .comment-time{color:var(--text-muted)}
+    .comment-text{font-size:.82rem;line-height:1.55;color:var(--text-muted)}
+    .comment-form{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    .comment-input{flex:1;min-width:180px;border:1px solid var(--border);background:var(--white);border-radius:100px;padding:.55rem .85rem;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--text-primary);outline:none}
+    .comment-input:focus{border-color:var(--primary-light)}
+    .btn-comment{border:none;border-radius:100px;background:var(--primary);color:var(--white);font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;padding:.55rem .9rem;cursor:pointer;transition:all .2s}
+    .btn-comment:hover{background:var(--primary-light)}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:1024px){
+      .generator-form{grid-template-columns:1fr 1fr;gap:1rem}
+      .btn-generate{grid-column:span 2}
+      .main-content{padding:2rem}
+    }
+    @media(max-width:768px){
+      .header{padding:0 1rem}
+      .nav-links{display:none}
+      .trainer-profile{border-left:none;padding-left:0}
+      .trainer-info{display:none}
+      .main-content{padding:1.5rem 1rem}
+      .generator-form{grid-template-columns:1fr;padding:1.5rem}
+      .btn-generate{grid-column:auto}
+      .case-study-inner{padding:1.5rem}
+      .generator-header{padding:1.5rem}
+      .stats-grid{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:480px){
+      .stats-grid{grid-template-columns:1fr}
+      .case-meta-row{flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo">Nova<span>Soins</span> Infirmiers</div>
+  <div class="header-right">
+    <nav class="nav-links">
+      <a href="#stats">Tableau de bord</a>
+      <a href="#generator">Générateur</a>
+      <a href="#feed">Communauté</a>
+    </nav>
+    <div class="trainer-profile">
+      <div class="trainer-info">
+        <div class="trainer-name" id="trainerName">Prof. Dr. Rahmouni</div>
+        <div class="trainer-role">Formateur</div>
+      </div>
+      <div class="trainer-avatar" id="trainerAvatar">DR</div>
+      <a href="index.html" class="btn-logout" id="logoutBtn">Déconnexion</a>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main-content">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-tag">Espace Formateur</div>
+    <h1 class="page-title">Tableau de Bord</h1>
+    <p class="page-subtitle">Bienvenue, <span id="trainerGreet">Formateur</span>. Voici un aperçu de votre plateforme.</p>
+  </div>
+
+  <!-- STATS -->
+  <div id="stats">
+    <div class="section-heading">
+      <span class="section-heading-icon">📊</span>
+      Statistiques de la Plateforme
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👩‍⚕️</div>
+        <div class="stat-value" data-target="3">0</div>
+        <div class="stat-label">Apprenants inscrits</div>
+        <div class="stat-trend">↑ Actifs ce mois</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📚</div>
+        <div class="stat-value" data-target="1">0</div>
+        <div class="stat-label">Module actif</div>
+        <div class="stat-trend">Hypnose conversationnelle</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎬</div>
+        <div class="stat-value" data-target="3">0</div>
+        <div class="stat-label">Vidéos intégrées</div>
+        <div class="stat-trend">Sections 2, 3, 4</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" data-target="8">0</div>
+        <div class="stat-label">Items en checklist</div>
+        <div class="stat-trend">Validation clinique</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value" data-target="5">0</div>
+        <div class="stat-label">Questions quiz</div>
+        <div class="stat-trend">Score requis : 4/5</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-value" data-target="3">0</div>
+        <div class="stat-label">Posts communauté</div>
+        <div class="stat-trend">Échanges actifs</div>
+      </div>
+    </div>
+
+    <!-- MODULE STATUS -->
+    <div class="section-heading">
+      <span class="section-heading-icon">📋</span>
+      État des Modules
+    </div>
+    <div class="modules-status">
+      <div class="module-status-card">
+        <div class="module-status-header blue">
+          <span class="module-status-icon">🧠</span>
+          <span class="module-status-name">Hypnose Conversationnelle</span>
+        </div>
+        <div class="module-status-body">
+          <div class="status-badge status-active"><span class="status-dot"></span>Publié &amp; Actif</div>
+          <div class="module-stats-row">
+            <div class="module-stat-item"><strong>6</strong>Sections</div>
+            <div class="module-stat-item"><strong>3</strong>Vidéos</div>
+            <div class="module-stat-item"><strong>5</strong>Techniques</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-status-card">
+        <div class="module-status-header teal">
+          <span class="module-status-icon">🌿</span>
+          <span class="module-status-name">Acupuncture</span>
+        </div>
+        <div class="module-status-body">
+          <div class="status-badge status-wip">🔄 En cours de développement</div>
+          <div class="module-stats-row">
+            <div class="module-stat-item"><strong>—</strong>Sections</div>
+            <div class="module-stat-item"><strong>—</strong>Vidéos</div>
+            <div class="module-stat-item"><strong>—</strong>Techniques</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-status-card">
+        <div class="module-status-header purple">
+          <span class="module-status-icon">🎵</span>
+          <span class="module-status-name">Musicothérapie</span>
+        </div>
+        <div class="module-status-body">
+          <div class="status-badge status-wip">🔄 En cours de développement</div>
+          <div class="module-stats-row">
+            <div class="module-stat-item"><strong>—</strong>Sections</div>
+            <div class="module-stat-item"><strong>—</strong>Vidéos</div>
+            <div class="module-stat-item"><strong>—</strong>Techniques</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CASE GENERATOR -->
+  <div id="generator">
+    <div class="generator-card">
+      <div class="generator-header">
+        <div class="generator-header-icon">🤖</div>
+        <div class="generator-header-text">
+          <h2>Générateur de Cas Cliniques</h2>
+          <p>Générez des scénarios cliniques réalistes pour vos formations</p>
+        </div>
+        <div class="ai-badge"><span class="ai-dot"></span>IA Simulation</div>
+      </div>
+
+      <div class="generator-form">
+        <div class="form-group">
+          <label class="form-label">Service</label>
+          <select class="form-select" id="serviceSelect">
+            <option value="">Choisir un service...</option>
+            <option value="Oncologie">Oncologie</option>
+            <option value="Hématologie">Hématologie</option>
+            <option value="Soins Palliatifs">Soins Palliatifs</option>
+            <option value="Radiothérapie">Radiothérapie</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Symptôme Principal</label>
+          <select class="form-select" id="symptomSelect">
+            <option value="">Choisir un symptôme...</option>
+            <option value="Anxiété Sévère">Anxiété Sévère</option>
+            <option value="Nausées Anticipatoires">Nausées Anticipatoires</option>
+            <option value="Douleur Chronique">Douleur Chronique</option>
+            <option value="Insomnie">Insomnie</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Approche Thérapeutique</label>
+          <select class="form-select" id="approachSelect">
+            <option value="">Choisir une approche...</option>
+            <option value="Hypnose Conversationnelle">Hypnose Conversationnelle</option>
+            <option value="Acupuncture">Acupuncture</option>
+            <option value="Musicothérapie">Musicothérapie</option>
+          </select>
+        </div>
+        <button class="btn-generate" onclick="generateCase()">✨ Générer</button>
+      </div>
+
+      <p class="generate-error" id="generateError"></p>
+
+      <!-- LOADING -->
+      <div class="loading-container" id="loadingContainer">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Génération du cas clinique...</div>
+        <div class="loading-sub">L'IA construit un scénario personnalisé</div>
+      </div>
+
+      <!-- CASE OUTPUT -->
+      <div class="case-study-container" id="caseContainer">
+        <div class="case-study-inner">
+          <div class="case-study-title-bar">
+            <div class="case-study-title">Cas Clinique Généré</div>
+            <div class="case-title-actions">
+              <button class="btn-case-action" onclick="printCase()">Imprimer</button>
+              <button class="btn-case-action" onclick="downloadCase()">Exporter</button>
+              <div class="case-id-badge">CAS-<span id="caseId">0000</span></div>
+            </div>
+          </div>
+
+          <div class="patient-name-display" id="patientName"></div>
+          <div class="case-meta-row">
+            <div class="meta-pill">🏥 Service : <strong id="metaService"></strong></div>
+            <div class="meta-pill">⚕️ Symptôme : <strong id="metaSymptom"></strong></div>
+            <div class="meta-pill">💡 Approche : <strong id="metaApproach"></strong></div>
+          </div>
+
+          <div class="case-section">
+            <div class="case-section-title">Contexte Clinique</div>
+            <div class="case-context" id="caseContext"></div>
+          </div>
+
+          <div class="case-section">
+            <div class="case-section-title">Simulation d'Interaction</div>
+            <div class="dialog-block">
+              <div class="dialog-item nurse">
+                <div class="dialog-speaker">Infirmier(e)</div>
+                <div class="dialog-text" id="dialogNurse1"></div>
+              </div>
+              <div class="dialog-item patient">
+                <div class="dialog-speaker">Patient</div>
+                <div class="dialog-text" id="dialogPatient"></div>
+              </div>
+              <div class="dialog-item nurse">
+                <div class="dialog-speaker">Infirmier(e)</div>
+                <div class="dialog-text" id="dialogNurse2"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="case-section">
+            <div class="case-section-title">Critères d'Évaluation</div>
+            <div class="eval-list">
+              <div class="eval-item"><span class="eval-check">✓</span>Le praticien établit un rapport de confiance avant l'intervention.</div>
+              <div class="eval-item"><span class="eval-check">✓</span>L'approche est présentée avec transparence et consentement explicite.</div>
+              <div class="eval-item"><span class="eval-check">✓</span>Le langage utilisé est permissif et respecte l'autonomie du patient.</div>
+              <div class="eval-item"><span class="eval-check">✓</span>Les techniques de synchronisation et d'ancrage sont appropriées.</div>
+              <div class="eval-item"><span class="eval-check">✓</span>Le suivi et l'évaluation des résultats sont documentés.</div>
+            </div>
+          </div>
+
+          <div class="case-section">
+            <div class="case-section-title">Questions de Réflexion pour l'Apprenant</div>
+            <div class="questions-block" id="questionsBlock"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMUNITY FEED -->
+  <div id="feed">
+    <div class="section-heading">
+      <span class="section-heading-icon">💬</span>
+      Communauté — Fil d'Actualité
+    </div>
+    <div class="feed-section">
+      <div class="feed-compose">
+        <div class="feed-compose-top">
+          <div class="compose-avatar" id="composeAvatar">DR</div>
+          <textarea class="compose-textarea" id="composeText" placeholder="Partagez une ressource, une observation clinique ou un conseil pour les apprenants..." rows="3"></textarea>
+        </div>
+        <div class="compose-footer">
+          <span class="compose-hint">Votre post sera visible par tous les membres</span>
+          <button class="btn-post" onclick="submitPost()">Publier</button>
+        </div>
+      </div>
+      <div class="feed-list" id="feedList"></div>
+    </div>
+  </div>
+
+</div><!-- /main-content -->
+
+<script>
+var SESSION_KEY = 'novasoins_user';
+var FEED_KEY    = 'novasoins_feed';
+var inMemoryFeed = null;
+
+var DEFAULT_POSTS = [
+  { id:1, author:'Prof. Dr. Rahmouni', role:'trainer', av:'DR', time:'2h',
+    content:"Rappel : l'hypnose conversationnelle n'est pas une manipulation. C'est un outil d'alliance therapeutique. Le consentement eclaire du patient est non negociable.", likes:11, comments:[] },
+  { id:2, author:'Sara Benali', role:'learner', av:'SB', time:'5h',
+    content:"Premiere application de la synchronisation respiratoire aujourd'hui - le patient a remarque la difference immediatement. Le langage permissif fonctionne vraiment !", likes:4, comments:[] },
+  { id:3, author:'Prof. Dr. Rahmouni', role:'trainer', av:'DR', time:'1j',
+    content:"Nouveau cas clinique disponible : essayez Soins Palliatifs + Douleur Chronique + Hypnose. Les questions de reflexion sont particulierement riches pour la discussion de groupe.", likes:7, comments:[] }
+];
+
+/* ── STORAGE ── */
+function readStorage(key){
+  try{ return localStorage.getItem(key); }catch(e){ return null; }
+}
+function writeStorage(key, value){
+  try{ localStorage.setItem(key, value); return true; }
+  catch(e){ if(key===FEED_KEY) inMemoryFeed=value; return false; }
+}
+function getUser(){
+  try{ return JSON.parse(readStorage(SESSION_KEY)); }catch(e){ return null; }
+}
+
+/* ── SESSION ── */
+function initSession(){
+  var user = getUser();
+  if(!user || user.role !== 'trainer'){
+    user = { name:'Prof. Dr. Rahmouni', role:'trainer' };
+    try{ writeStorage(SESSION_KEY, JSON.stringify(user)); }catch(e){}
+  }
+  var name = user.name || 'Formateur';
+  var initials = name.split(' ').filter(Boolean).map(function(p){ return p[0]; }).slice(0,2).join('').toUpperCase();
+  document.getElementById('trainerName').textContent   = name;
+  document.getElementById('trainerGreet').textContent  = name;
+  document.getElementById('trainerAvatar').textContent = initials;
+  document.getElementById('composeAvatar').textContent = initials;
+}
+
+function logout(e){
+  e.preventDefault();
+  try{ localStorage.removeItem(SESSION_KEY); }catch(err){}
+  window.location.href = 'index.html';
+}
+document.getElementById('logoutBtn').addEventListener('click', logout);
+
+/* ── STATS ── */
+function animateStats(){
+  document.querySelectorAll('.stat-value[data-target]').forEach(function(el){
+    var target = parseInt(el.dataset.target, 10);
+    var current = 0;
+    var step = Math.ceil(target / 30);
+    var timer = setInterval(function(){
+      current = Math.min(current + step, target);
+      el.textContent = current;
+      if(current >= target) clearInterval(timer);
+    }, 40);
+  });
+}
+
+/* ── CASE DATA ── */
+var CASE_VARIANTS = {
+  'Oncologie': {
+    'Anxiete Severe': [
+      { patientName:'Mme Nadia Kacem, 49 ans',
+        context:"Patiente suivie pour cancer du sein, arrivant pour sa troisieme seance de chimiotherapie. Elle presente une respiration rapide et verbalise une peur intense de perdre le controle pendant la perfusion.",
+        patient:"Je sais que je dois faire le traitement, mais des que je vois la salle mon coeur s'emballe. J'ai peur de paniquer devant tout le monde." },
+      { patientName:'M. Karim Mansouri, 57 ans',
+        context:"Patient traite pour cancer colorectal en hopital de jour. Il rapporte une anxiete anticipatoire depuis la veille avec insomnie et tension musculaire.",
+        patient:"Je fais semblant d'etre calme, mais dans ma tete j'imagine deja le pire. J'aimerais juste reussir a respirer normalement." }
+    ],
+    'Nausees Anticipatoires': [
+      { patientName:'Mme Ines Morel, 42 ans',
+        context:"Patiente sous chimiotherapie adjuvante, presentant des nausees des l'entree dans le service malgre une premedication correcte.",
+        patient:"Je n'ai meme pas commence la perfusion et j'ai deja la nausee. C'est comme si mon corps savait avant moi." },
+      { patientName:'M. Youssef Haddad, 61 ans',
+        context:"Patient en oncologie digestive avec nausees anticipatoires apres deux cycles difficiles. Il evite de parler du traitement.",
+        patient:"Rien que le trajet vers l'hopital me retourne l'estomac. Ce n'est pas seulement le medicament, c'est devenu automatique." }
+    ],
+    'Douleur Chronique': [
+      { patientName:'Mme Claire Durand, 64 ans',
+        context:"Patiente suivie pour cancer ovarien avance, douleur pelvienne chronique stabilisee mais envahissante malgre les antalgiques.",
+        patient:"La douleur est moins forte qu'avant mais elle prend toute la place. J'ai besoin d'une methode quand elle remonte." },
+      { patientName:'M. Sami Trabelsi, 55 ans',
+        context:"Patient atteint de cancer bronchique avec douleurs thoraciques persistantes. L'equipe cherche une approche complementaire.",
+        patient:"Quand ca serre dans la poitrine, je pense que la maladie gagne. La douleur me fait peur autant qu'elle me fait mal." }
+    ],
+    'Insomnie': [
+      { patientName:'Mme Amina Ferchichi, 52 ans',
+        context:"Patiente en radiotherapie complementaire decrivant des reveils nocturnes repetes et des pensees intrusives liees au pronostic.",
+        patient:"La journee je tiens, mais la nuit tout revient. Je regarde l'heure et calcule combien de temps il me reste avant l'hopital." },
+      { patientName:'M. Paul Garnier, 68 ans',
+        context:"Patient en surveillance oncologique se plaignant d'endormissement tardif et d'une hypervigilance corporelle.",
+        patient:"Des que je ferme les yeux, je scanne mon corps. Le moindre inconfort me reveille completement." }
+    ]
+  },
+  'Hematologie': {
+    'Anxiete Severe': [
+      { patientName:'M. Rachid Bensaid, 60 ans',
+        context:"Patient hospitalise pour leucemie aigue, anxieux avant une ponction de moelle. Il craint la douleur et l'attente des resultats.",
+        patient:"Je sais que vous faites ca souvent, mais moi je bloque. J'ai peur de l'examen et encore plus de ce qu'il va annoncer." },
+      { patientName:'Mme Elise Bernard, 45 ans',
+        context:"Patiente en hematologie pour lymphome, tres inquiete avant une nouvelle cure suite a une reaction indesirable precedente.",
+        patient:"Depuis la derniere fois je n'arrive plus a me detendre. J'ai peur que mon corps reagisse encore mal." }
+    ],
+    'Nausees Anticipatoires': [
+      { patientName:'M. Jalel Sassi, 54 ans',
+        context:"Patient sous chimiotherapie intensive pour lymphome, nausees declenchees des la preparation de la chambre.",
+        patient:"Quand j'entends le chariot arriver, c'est fini. Mon ventre se serre avant qu'on me pose la perfusion." },
+      { patientName:'Mme Sophie Keller, 39 ans',
+        context:"Patiente en hematologie ambulatoire, nausees anticipatoires liees au souvenir d'une premiere cure eprouvante.",
+        patient:"Je prefere venir a jeun meme si je sais que ce n'est pas ideal. J'ai peur que tout remonte." }
+    ],
+    'Douleur Chronique': [
+      { patientName:'M. Antoine Perrin, 63 ans',
+        context:"Patient atteint de myelome multiple, douleurs osseuses lombaires. Les antalgiques soulagent partiellement.",
+        patient:"J'ai appris a vivre avec, mais chaque mouvement me rappelle la maladie. J'aimerais bouger sans apprehension." },
+      { patientName:'Mme Leila Haddad, 58 ans',
+        context:"Patiente pour hemopathie chronique, douleurs diffuses et fatigue importante. Elle decrit un corps lourd.",
+        patient:"Ce n'est pas une douleur spectaculaire mais elle est la tout le temps. Elle m'use." }
+    ],
+    'Insomnie': [
+      { patientName:'M. Julien Faure, 51 ans',
+        context:"Patient en secteur protege, sommeil fragmente par les alarmes et l'inquietude liee a l'aplasie.",
+        patient:"Meme quand tout est calme, j'attends le prochain bruit. Je dors par petits bouts, jamais vraiment." },
+      { patientName:'Mme Myriam Ouali, 47 ans',
+        context:"Patiente en hematologie, insomniaque depuis l'annonce du diagnostic. Elle rumine les examens biologiques.",
+        patient:"La nuit je repense aux chiffres, aux globules, aux risques. Mon cerveau ne s'arrete plus." }
+    ]
+  },
+  'Soins Palliatifs': {
+    'Anxiete Severe': [
+      { patientName:'Mme Jeanne Martin, 72 ans',
+        context:"Patiente en phase palliative d'un cancer pancreatique, anxiete intense lors des episodes de dyspnee.",
+        patient:"Quand le souffle manque, j'ai l'impression que tout m'echappe. Je ne veux pas paniquer devant ma famille." },
+      { patientName:'M. Ahmed Lounis, 69 ans',
+        context:"Patient en soins palliatifs pour cancer pulmonaire, anxieux a l'approche de la nuit. Il associe l'obscurite a la solitude.",
+        patient:"La journee ca va, mais le soir je sens monter une peur que je n'arrive pas a expliquer." }
+    ],
+    'Nausees Anticipatoires': [
+      { patientName:'Mme Helene Roche, 66 ans',
+        context:"Patiente en soins palliatifs, nausees majorees avant les soins de bouche et les prises medicamenteuses.",
+        patient:"Rien que de voir le verre et les comprimes, j'ai la gorge qui se ferme. Je me sens genee." },
+      { patientName:'M. Nabil Cherif, 74 ans',
+        context:"Patient en phase avancee, nausees anticipatoires avant certains soins d'hygiene.",
+        patient:"Je sais que vous etes la pour m'aider, mais mon corps reagit avant que je puisse me raisonner." }
+    ],
+    'Douleur Chronique': [
+      { patientName:'Mme Rose Lefort, 79 ans',
+        context:"Patiente en soins palliatifs pour cancer metastatique, douleur osseuse chronique malgre traitement equilibre.",
+        patient:"Les medicaments aident mais parfois la douleur deborde. J'aimerais avoir quelque chose a faire dans ces moments-la." },
+      { patientName:'M. Farid Amara, 70 ans',
+        context:"Patient avec douleur chronique abdominale en contexte palliatif. Il redoute les soins qui necessitent une mobilisation.",
+        patient:"J'ai peur avant meme que la douleur arrive. C'est comme si mon corps se preparait au pire." }
+    ],
+    'Insomnie': [
+      { patientName:'Mme Colette Bianchini, 76 ans',
+        context:"Patiente en soins palliatifs, sommeil perturbe par l'inquietude et la douleur de fond.",
+        patient:"Je ne cherche pas a dormir dix heures. Je voudrais juste quelques heures tranquilles, sans lutte." },
+      { patientName:'M. Salim Ben Youssef, 73 ans',
+        context:"Patient en unite palliative alternant somnolence diurne et eveils anxieux. Il exprime un besoin de securite.",
+        patient:"Je me reveille sans savoir l'heure et tout me parait plus lourd. J'ai besoin qu'on m'aide a retrouver le calme." }
+    ]
+  },
+  'Radiotherapie': {
+    'Anxiete Severe': [
+      { patientName:'M. Hugo Delmas, 56 ans',
+        context:"Patient en radiotherapie ORL, tres anxieux lors de la mise en place du masque de contention.",
+        patient:"Des que le masque descend, je me sens coince. Je sais que ca ne dure pas longtemps, mais mon corps panique." },
+      { patientName:'Mme Lina Saidi, 44 ans',
+        context:"Patiente debutant une radiotherapie mammaire, inquiete devant la machine et la precision du positionnement.",
+        patient:"J'ai peur de ne pas rester assez immobile. Plus j'essaie de controler, plus je me tends." }
+    ],
+    'Nausees Anticipatoires': [
+      { patientName:'M. Victor Nguyen, 59 ans',
+        context:"Patient en radiotherapie abdominale, nausees anticipatoires declenchees en salle d'attente.",
+        patient:"Je commence a avoir mal au coeur avant meme d'entrer. Mon corps associe deja le lieu aux nausees." },
+      { patientName:'Mme Samira Khelifi, 62 ans',
+        context:"Patiente sous radiotherapie pelvienne, anticipant les effets digestifs. Elle arrive crispee et evite de boire.",
+        patient:"Mon ventre se noue des le matin. J'apprehende chaque seance." }
+    ],
+    'Douleur Chronique': [
+      { patientName:'Mme Isabelle Caron, 67 ans',
+        context:"Patiente en radiotherapie antalgique pour metastases osseuses, douleur a la hanche avec apprehension du positionnement.",
+        patient:"Ce n'est pas la seance qui me fait peur, c'est de devoir m'installer avec cette douleur." },
+      { patientName:'M. Mourad Tazi, 65 ans',
+        context:"Patient traite pour lesion vertebrale douloureuse, tension musculaire importante avant chaque positionnement.",
+        patient:"Quand je vois la table, mon dos se contracte deja. Apres, tout devient plus difficile." }
+    ],
+    'Insomnie': [
+      { patientName:'M. Enzo Martini, 53 ans',
+        context:"Patient en radiotherapie thoracique, insomniaque depuis le debut. Il associe fatigue, toux nocturne et inquietude.",
+        patient:"Je compte les seances dans ma tete au lieu de dormir. Le matin j'arrive deja epuise." },
+      { patientName:'Mme Fatima Zribi, 60 ans',
+        context:"Patiente en radiotherapie cerebrale, sommeil perturbe par la peur des effets secondaires.",
+        patient:"Le soir je redoute la nuit, parce que mes pensees vont tourner autour du traitement." }
+    ]
+  }
+};
+
+var APPROACH_DIALOGUES = {
+  'Hypnose Conversationnelle': {
+    nurse1:"Avant le soin, je vous propose un temps tres court pour reprendre appui sur votre respiration. Vous gardez le controle a chaque instant. Est-ce acceptable pour vous ?",
+    nurse2:"Pendant que vous inspirez doucement, choisissez un point fixe. A chaque expiration, laissez une partie du corps devenir un peu plus disponible, sans forcer le calme."
+  },
+  'Acupuncture': {
+    nurse1:"Nous pouvons utiliser une stimulation douce de points reconnus pour accompagner l'inconfort. Je vous explique chaque geste avant de le faire.",
+    nurse2:"Je commence par une stimulation legere et progressive. Observez simplement les sensations : chaleur, relachement, picotement - tout est une information utile."
+  },
+  'Musicotherapie': {
+    nurse1:"Je vous propose une ecoute guidee avec un rythme stable et rassurant. Vous pouvez garder les yeux ouverts ou fermes selon ce qui vous convient.",
+    nurse2:"Laissez le tempo devenir un point d'appui. Quand une pensee apparait, revenez a la melodie comme a un fil conducteur pendant le soin."
+  }
+};
+
+var SYMPTOM_QUESTIONS = {
+  'Anxiete Severe': [
+    "Quels signes verbaux et non verbaux permettent d'evaluer la diminution de l'anxiete ?",
+    "Comment reformuler la proposition si le patient exprime une peur de perdre le controle ?",
+    "Quels elements documenter pour assurer la continuite avec l'equipe ?"
+  ],
+  'Nausees Anticipatoires': [
+    "Quels declencheurs sensoriels ou contextuels sont identifies dans cette situation ?",
+    "Comment associer l'approche non medicamenteuse au traitement antiemetique prescrit ?",
+    "Quel indicateur simple utiliser pour suivre l'evolution des nausees avant et apres ?"
+  ],
+  'Douleur Chronique': [
+    "Comment distinguer soulagement de la douleur et diminution de l'anxiete associee ?",
+    "Quelle posture infirmiere favorise l'autonomie du patient face aux pics douloureux ?",
+    "Quelles limites cliniques imposent une reevaluation medicale rapide ?"
+  ],
+  'Insomnie': [
+    "Quels facteurs environnementaux et emotionnels entretiennent l'insomnie dans ce contexte ?",
+    "Quelle routine courte proposer avant le coucher ou avant une seance matinale ?",
+    "Comment evaluer l'efficacite sans promettre une disparition complete du symptome ?"
+  ]
+};
+
+/* ── KEY MATCHING ── */
+function toKey(str){
+  return String(str||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+}
+function findKey(map, value){
+  var t = toKey(value);
+  var keys = Object.keys(map);
+  for(var i=0;i<keys.length;i++){
+    if(toKey(keys[i])===t) return keys[i];
+  }
+  return keys[0];
+}
+
+var rotationTracker = {};
+var currentCaseData = null;
+
+function getFallback(service, symptom, approach){
+  var svcKey = findKey(CASE_VARIANTS, service);
+  var symMap = CASE_VARIANTS[svcKey] || CASE_VARIANTS['Oncologie'];
+  var symKey = findKey(symMap, symptom);
+  var appKey = findKey(APPROACH_DIALOGUES, approach);
+
+  var variants  = symMap[symKey] || symMap[Object.keys(symMap)[0]];
+  var dialogue  = APPROACH_DIALOGUES[appKey] || APPROACH_DIALOGUES['Hypnose Conversationnelle'];
+  var questions = SYMPTOM_QUESTIONS[symKey]  || SYMPTOM_QUESTIONS['Anxiete Severe'];
+
+  var rotKey = svcKey+'|'+symKey+'|'+appKey;
+  var idx = rotationTracker[rotKey] || 0;
+  rotationTracker[rotKey] = (idx+1) % variants.length;
+
+  var v = variants[idx];
+  return { patientName:v.patientName, context:v.context,
+    nurse1:dialogue.nurse1, patient:v.patient, nurse2:dialogue.nurse2,
+    q1:questions[0], q2:questions[1], q3:questions[2] };
+}
+
+/* ── POPULATE ── */
+function populateCase(data, service, symptom, approach){
+  var caseId = String(Math.floor(Math.random()*9000)+1000);
+  currentCaseData = { patientName:data.patientName, context:data.context,
+    nurse1:data.nurse1, patient:data.patient, nurse2:data.nurse2,
+    q1:data.q1, q2:data.q2, q3:data.q3,
+    service:service, symptom:symptom, approach:approach, caseId:caseId };
+  document.getElementById('caseId').textContent        = caseId;
+  document.getElementById('patientName').textContent   = data.patientName;
+  document.getElementById('metaService').textContent   = service;
+  document.getElementById('metaSymptom').textContent   = symptom;
+  document.getElementById('metaApproach').textContent  = approach;
+  document.getElementById('caseContext').textContent   = data.context;
+  document.getElementById('dialogNurse1').textContent  = data.nurse1;
+  document.getElementById('dialogPatient').textContent = data.patient;
+  document.getElementById('dialogNurse2').textContent  = data.nurse2;
+  document.getElementById('questionsBlock').innerHTML  =
+    [data.q1, data.q2, data.q3].map(function(q){
+      return '<div class="question-item">'+q+'<\/div>';
+    }).join('');
+}
+
+/* ── EXPORT ── */
+function downloadCase(){
+  if(!currentCaseData) return;
+  var lines = [
+    'NovaSoins Infirmiers - Cas clinique CAS-'+currentCaseData.caseId,'',
+    'Patient  : '+currentCaseData.patientName,
+    'Service  : '+currentCaseData.service,
+    'Symptome : '+currentCaseData.symptom,
+    'Approche : '+currentCaseData.approach,'',
+    'CONTEXTE CLINIQUE', currentCaseData.context,'',
+    "SIMULATION D'INTERACTION",
+    'Infirmier(e) : '+currentCaseData.nurse1,
+    'Patient      : '+currentCaseData.patient,
+    'Infirmier(e) : '+currentCaseData.nurse2,'',
+    'QUESTIONS DE REFLEXION',
+    '1. '+currentCaseData.q1,
+    '2. '+currentCaseData.q2,
+    '3. '+currentCaseData.q3
+  ];
+  var blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url; a.download = 'cas-clinique-'+currentCaseData.caseId+'.txt';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function printCase(){
+  if(!currentCaseData) return;
+  var pw = window.open('','_blank');
+  if(!pw){ window.print(); return; }
+  var h = '<html><head><title>CAS-'+currentCaseData.caseId+'<\/title>'
+    + '<style>body{font-family:Arial,sans-serif;color:#1E3344;padding:32px;max-width:720px;margin:auto}'
+    + 'h1{font-size:20px;color:#0B1E2D}h2{font-size:13px;color:#1A6B8A;text-transform:uppercase;margin-top:20px}'
+    + '.meta{background:#F4F8FA;border:1px solid #d9e4ea;border-radius:8px;padding:12px;margin:16px 0;font-size:14px}'
+    + '.dlg{border-left:4px solid #6ECFA8;padding:8px 12px;margin:8px 0;background:#f9fdfc}'
+    + '.dlg b{font-size:11px;text-transform:uppercase;color:#1A6B8A;display:block;margin-bottom:4px}'
+    + 'ol{padding-left:1.2em}li{margin-bottom:.4em;font-size:14px;color:#4a6070}'
+    + '<\/style><\/head><body>'
+    + '<h1>NovaSoins - CAS-'+currentCaseData.caseId+'<\/h1>'
+    + '<div class="meta"><b>Patient:<\/b> '+currentCaseData.patientName+'<br>'
+    + '<b>Service:<\/b> '+currentCaseData.service+'<br>'
+    + '<b>Symptome:<\/b> '+currentCaseData.symptom+'<br>'
+    + '<b>Approche:<\/b> '+currentCaseData.approach+'<\/div>'
+    + '<h2>Contexte clinique<\/h2><p style="font-size:14px;color:#4a6070">'+currentCaseData.context+'<\/p>'
+    + '<h2>Simulation<\/h2>'
+    + '<div class="dlg"><b>Infirmier(e)<\/b>'+currentCaseData.nurse1+'<\/div>'
+    + '<div class="dlg"><b>Patient<\/b>'+currentCaseData.patient+'<\/div>'
+    + '<div class="dlg"><b>Infirmier(e)<\/b>'+currentCaseData.nurse2+'<\/div>'
+    + '<h2>Questions de reflexion<\/h2>'
+    + '<ol><li>'+currentCaseData.q1+'<\/li><li>'+currentCaseData.q2+'<\/li><li>'+currentCaseData.q3+'<\/li><\/ol>'
+    + '<\/body><\/html>';
+  pw.document.write(h);
+  pw.document.close();
+  pw.focus();
+  pw.print();
+}
+
+/* ── GENERATE ── */
+function generateCase(){
+  var service  = document.getElementById('serviceSelect').value;
+  var symptom  = document.getElementById('symptomSelect').value;
+  var approach = document.getElementById('approachSelect').value;
+  var errEl    = document.getElementById('generateError');
+  errEl.style.display = 'none';
+  if(!service || !symptom || !approach){
+    errEl.textContent = "Veuillez selectionner le service, le symptome et l'approche.";
+    errEl.style.display = 'block';
+    return;
+  }
+  var loadEl = document.getElementById('loadingContainer');
+  var caseEl = document.getElementById('caseContainer');
+  var genBtn = document.querySelector('.btn-generate');
+  loadEl.classList.add('active');
+  caseEl.classList.remove('active');
+  genBtn.disabled = true;
+  setTimeout(function(){
+    var result = getFallback(service, symptom, approach);
+    populateCase(result, service, symptom, approach);
+    loadEl.classList.remove('active');
+    caseEl.classList.add('active');
+    genBtn.disabled = false;
+    setTimeout(function(){ caseEl.scrollIntoView({behavior:'smooth',block:'nearest'}); }, 100);
+  }, 900 + Math.floor(Math.random()*800));
+}
+
+/* ── FEED ── */
+function getFeed(){
+  try{
+    var raw = readStorage(FEED_KEY);
+    if(raw) return JSON.parse(raw);
+    if(inMemoryFeed) return JSON.parse(inMemoryFeed);
+    return null;
+  }catch(e){ return null; }
+}
+function saveFeed(p){ writeStorage(FEED_KEY, JSON.stringify(p)); }
+
+function initFeed(){
+  if(!getFeed()) saveFeed(DEFAULT_POSTS);
+  renderFeed();
+}
+
+function escapeHtml(v){
+  return String(v||'').replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function renderComments(post){
+  var comments = post.comments || [];
+  var listHtml = '';
+  if(comments.length){
+    listHtml = '<div class="comment-list">';
+    for(var i=0;i<comments.length;i++){
+      var c = comments[i];
+      listHtml += '<div class="comment-item">'
+        + '<div class="comment-head"><span class="comment-author">'+escapeHtml(c.author)+'<\/span>'
+        + '<span class="comment-time">'+escapeHtml(c.time)+'<\/span><\/div>'
+        + '<div class="comment-text">'+escapeHtml(c.text)+'<\/div><\/div>';
+    }
+    listHtml += '<\/div>';
+  }
+  var ph = comments.length ? 'Ajouter un commentaire' : 'Soyez le premier a commenter';
+  return '<div class="post-comments">'+listHtml
+    + '<div class="comment-form">'
+    + '<input class="comment-input" id="comment-'+post.id+'" type="text" placeholder="'+ph+'" '
+    + 'onkeydown="if(event.key===\'Enter\')addComment('+post.id+')">'
+    + '<button class="btn-comment" onclick="addComment('+post.id+')">Commenter<\/button>'
+    + '<\/div><\/div>';
+}
+
+function renderFeed(){
+  var posts = getFeed() || DEFAULT_POSTS;
+  var user  = getUser();
+  var list  = document.getElementById('feedList');
+  var html  = '';
+  for(var i=0;i<posts.length;i++){
+    var p = posts[i];
+    var isOwner   = user && user.name === p.author;
+    var avClass   = p.role==='trainer' ? 'av-trainer' : 'av-learner';
+    var pillClass = p.role==='trainer' ? 'pill-trainer' : 'pill-learner';
+    var roleLabel = p.role==='trainer' ? 'Formateur' : 'Infirmier(e)';
+    var cc = (p.comments||[]).length;
+    var delBtn = isOwner ? '<button class="btn-action btn-delete" onclick="deletePost('+p.id+')">Supprimer<\/button>' : '';
+    html += '<div class="post-card" id="post-'+p.id+'">'
+      + '<div class="post-header">'
+      + '<div class="post-avatar '+avClass+'">'+escapeHtml(p.av)+'<\/div>'
+      + '<div class="post-meta">'
+      + '<div class="post-author">'+escapeHtml(p.author)+'<\/div>'
+      + '<div class="post-sub"><span class="role-pill '+pillClass+'">'+roleLabel+'<\/span>'
+      + '<span class="post-time">'+escapeHtml(p.time)+'<\/span><\/div>'
+      + '<\/div><\/div>'
+      + '<div class="post-content">'+escapeHtml(p.content)+'<\/div>'
+      + '<div class="post-footer">'
+      + '<button class="btn-like" onclick="likePost('+p.id+',this)">&#9825; '+p.likes+' J\'aime<\/button>'
+      + '<button class="btn-action" onclick="document.getElementById(\'comment-'+p.id+'\').focus()">&#128172; '+cc+' Commentaire'+(cc>1?'s':'')+'<\/button>'
+      + '<button class="btn-action" onclick="sharePost('+p.id+')">Partager<\/button>'
+      + delBtn
+      + '<\/div>'
+      + renderComments(p)
+      + '<\/div>';
+  }
+  list.innerHTML = html;
+}
+
+function submitPost(){
+  var text = document.getElementById('composeText').value.trim();
+  if(!text) return;
+  var user  = getUser() || {name:'Prof. Dr. Rahmouni', role:'trainer'};
+  var av    = (user.name||'NS').split(' ').filter(Boolean).map(function(p){return p[0];}).slice(0,2).join('').toUpperCase();
+  var posts = getFeed() || [];
+  posts.unshift({id:Date.now(), author:user.name||'Formateur', role:'trainer', av:av, time:"A l'instant", content:text, likes:0, comments:[]});
+  saveFeed(posts);
+  document.getElementById('composeText').value = '';
+  renderFeed();
+}
+
+function likePost(id, btn){
+  var posts = getFeed() || [];
+  var post  = posts.find(function(p){return p.id===id;});
+  if(!post) return;
+  var liked = btn.classList.toggle('liked');
+  post.likes = liked ? post.likes+1 : Math.max(0,post.likes-1);
+  btn.innerHTML = '&#9825; '+post.likes+' J\'aime';
+  saveFeed(posts);
+}
+
+function sharePost(id){
+  var posts = getFeed() || DEFAULT_POSTS;
+  var post  = posts.find(function(p){return p.id===id;});
+  if(!post) return;
+  var text = post.author+' sur NovaSoins :\n\n"'+post.content+'"';
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(function(){showToast('Post copie dans le presse-papiers');});
+  } else { showToast('Copiez le texte manuellement'); }
+}
+
+function deletePost(id){
+  var posts = getFeed() || DEFAULT_POSTS;
+  var idx   = posts.findIndex(function(p){return p.id===id;});
+  if(idx===-1) return;
+  posts.splice(idx,1);
+  saveFeed(posts);
+  renderFeed();
+  showToast('Post supprime');
+}
+
+function addComment(id){
+  var input = document.getElementById('comment-'+id);
+  var text  = input ? input.value.trim() : '';
+  if(!text) return;
+  var posts = getFeed() || DEFAULT_POSTS;
+  var post  = posts.find(function(p){return p.id===id;});
+  var user  = getUser() || {name:'Formateur'};
+  if(!post) return;
+  post.comments = post.comments || [];
+  post.comments.push({id:Date.now(), author:user.name||'Formateur', text:text, time:"A l'instant"});
+  saveFeed(posts);
+  renderFeed();
+  showToast('Commentaire ajoute');
+}
+
+function showToast(msg){
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function(){toast.classList.remove('show');}, 2500);
+}
+
+/* ── INIT ── */
+initSession();
+initFeed();
+animateStats();
+var _so = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){ if(e.isIntersecting){ animateStats(); _so.disconnect(); } });
+},{threshold:0.2});
+var _sg = document.querySelector('.stats-grid');
+if(_sg) _so.observe(_sg);
+</script>
+<div class="toast" id="toast"></div>
+</body>
+</html>

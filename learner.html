@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaSoins — Espace Apprenant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --dark-bg:#0B1E2D; --surface-dark:#112534;
+      --primary:#1A6B8A; --primary-light:#2E86AB;
+      --accent:#6ECFA8;  --accent-soft:#C8F0E0;
+      --surface:#F4F8FA; --white:#ffffff;
+      --text-primary:#1E3344; --text-muted:#6B8A9A;
+      --border:rgba(30,51,68,0.1);
+      --border-on-dark:rgba(110,207,168,0.12);
+    }
+
+    html{scroll-behavior:smooth}
+
+    body{
+      font-family:'DM Sans',sans-serif;
+      background:var(--surface);
+      color:var(--text-primary);
+      display:flex; height:100vh; overflow:hidden;
+      animation:fadeLoad .5s ease both;
+    }
+
+    @keyframes fadeLoad{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── HEADER ── */
+    .header{
+      position:fixed;top:0;left:0;right:0;height:64px;
+      background:rgba(11,30,45,0.98);
+      border-bottom:1px solid var(--border-on-dark);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 1.5rem;z-index:90;backdrop-filter:blur(16px);
+    }
+    .header-left{display:flex;align-items:center;gap:1rem}
+    .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+    .hamburger span{display:block;width:22px;height:2px;background:rgba(255,255,255,.7);border-radius:2px;transition:all .3s}
+    .header-logo{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--white)}
+    .header-logo span{color:var(--accent)}
+    .header-right{display:flex;align-items:center;gap:.75rem}
+    .user-info{text-align:right}
+    .user-name{font-size:.85rem;color:rgba(255,255,255,.75);font-weight:500}
+    .user-role{font-size:.7rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+    .user-avatar{
+      width:36px;height:36px;border-radius:50%;
+      background:linear-gradient(135deg,var(--primary),var(--accent));
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:var(--dark-bg);font-size:.8rem;flex-shrink:0;
+    }
+    .btn-logout-sm{
+      padding:.35rem .9rem;background:transparent;color:rgba(255,255,255,.6);
+      border:1px solid rgba(255,255,255,.15);border-radius:100px;
+      font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;
+      text-decoration:none;transition:all .2s;
+    }
+    .btn-logout-sm:hover{border-color:var(--accent);color:var(--accent)}
+
+    /* ── PROGRESS BAR ── */
+    .progress-header{
+      position:fixed;top:64px;left:0;right:0;height:44px;
+      background:var(--white);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;padding:0 1.5rem;gap:.75rem;z-index:89;
+    }
+    .progress-label{font-size:.75rem;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+    .progress-bar-wrap{flex:1;height:5px;background:rgba(26,107,138,.1);border-radius:100px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));width:0%;transition:width .4s ease;border-radius:100px}
+    .progress-pct{font-size:.78rem;color:var(--primary);font-weight:600;min-width:38px;text-align:right}
+
+    /* ── SIDEBAR ── */
+    .sidebar{
+      position:fixed;left:0;top:108px;width:260px;
+      height:calc(100vh - 108px);background:var(--white);
+      border-right:1px solid var(--border);overflow-y:auto;
+      padding:1.5rem 0;z-index:88;transition:transform .3s ease;
+    }
+    .sidebar-label{padding:.5rem 1.5rem;font-size:.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem}
+    .sidebar-item{
+      padding:.85rem 1.25rem;margin:0 .75rem .25rem;border-radius:12px;
+      cursor:pointer;font-size:.875rem;color:var(--text-muted);
+      transition:all .2s;display:flex;align-items:center;gap:.75rem;
+      border:1px solid transparent;
+    }
+    .sidebar-item:hover{background:rgba(26,107,138,.06);color:var(--primary);border-color:rgba(26,107,138,.1)}
+    .sidebar-item.active{background:rgba(26,107,138,.08);color:var(--primary);border-color:var(--primary);font-weight:600}
+    .sidebar-num{
+      width:22px;height:22px;border-radius:50%;background:rgba(26,107,138,.1);
+      display:flex;align-items:center;justify-content:center;
+      font-size:.65rem;font-weight:700;color:var(--primary);flex-shrink:0;
+    }
+    .sidebar-item.active .sidebar-num{background:var(--accent);color:var(--dark-bg)}
+    .sidebar-icon{font-size:.95rem;flex-shrink:0}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:87;backdrop-filter:blur(2px)}
+
+    /* ── MAIN ── */
+    .main-container{
+      margin-left:260px;margin-top:108px;flex:1;
+      display:flex;flex-direction:column;height:calc(100vh - 108px);
+    }
+    .content-area{flex:1;overflow-y:auto;padding:2.5rem;scroll-behavior:smooth}
+    .section{display:none;animation:fadeIn .4s ease both}
+    .section.active{display:block}
+
+    /* ── SECTION HEADINGS ── */
+    .section-title-main{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;color:var(--text-primary);letter-spacing:-.025em;margin-bottom:.5rem}
+    .section-subtitle{font-size:.95rem;color:var(--text-muted);margin-bottom:2rem;line-height:1.6}
+    .content-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:2rem;margin-bottom:1.5rem}
+    .content-card h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:.75rem}
+    .content-card p{font-size:.9rem;color:var(--text-muted);line-height:1.75}
+
+    /* ── VIDEO EMBED ── */
+    .video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin:1.5rem 0;background:var(--dark-bg)}
+    .video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px}
+
+    /* ── GOALS GRID ── */
+    .goals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0}
+    .goal-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;border-left:3px solid var(--accent)}
+    .goal-icon{font-size:1.5rem;margin-bottom:.5rem}
+    .goal-title{font-weight:600;font-size:.9rem;color:var(--text-primary);margin-bottom:.35rem}
+    .goal-desc{font-size:.8rem;color:var(--text-muted);line-height:1.5}
+
+    /* ── ACCORDION ── */
+    .accordion-item{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:.75rem;transition:box-shadow .2s}
+    .accordion-item:hover{box-shadow:0 4px 16px rgba(26,107,138,.06)}
+    .accordion-header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:1.1rem 1.25rem;cursor:pointer;background:var(--white);
+      transition:background .2s;
+    }
+    .accordion-header:hover{background:var(--surface)}
+    .accordion-item.active .accordion-header{background:rgba(26,107,138,.04)}
+    .accordion-header-left{display:flex;align-items:center;gap:.75rem}
+    .accordion-badge{
+      padding:.2rem .65rem;background:var(--accent-soft);color:var(--primary);
+      border-radius:100px;font-size:.68rem;font-weight:600;white-space:nowrap;
+    }
+    .accordion-title{font-size:.9rem;font-weight:500;color:var(--text-primary)}
+    .accordion-chevron{color:var(--text-muted);transition:transform .3s;font-size:.8rem}
+    .accordion-item.active .accordion-chevron{transform:rotate(90deg)}
+    .accordion-body{display:none;padding:0 1.25rem 1.25rem;background:var(--surface)}
+    .accordion-item.active .accordion-body{display:block}
+    .accordion-body p{font-size:.875rem;color:var(--text-muted);line-height:1.7;margin-bottom:.75rem}
+    .technique-example{
+      border-left:3px solid var(--accent);background:rgba(110,207,168,.08);
+      border-radius:0 8px 8px 0;padding:.75rem 1rem;
+    }
+    .technique-example strong{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--primary);margin-bottom:.3rem}
+    .technique-example p{font-size:.82rem;color:var(--text-primary);font-style:italic;margin:0}
+
+    /* ── STEPS TIMELINE ── */
+    .steps-timeline{display:flex;flex-direction:column;gap:0;position:relative}
+    .step-item{display:flex;gap:1.25rem;position:relative;padding-bottom:1.5rem}
+    .step-item:last-child{padding-bottom:0}
+    .step-item::before{content:'';position:absolute;left:19px;top:40px;bottom:0;width:2px;background:var(--border)}
+    .step-item:last-child::before{display:none}
+    .step-circle{
+      width:40px;height:40px;border-radius:50%;background:var(--primary);
+      display:flex;align-items:center;justify-content:center;
+      color:var(--white);font-weight:700;font-size:.9rem;flex-shrink:0;z-index:1;
+    }
+    .step-content{flex:1;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
+    .step-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:.5rem}
+    .step-desc{font-size:.875rem;color:var(--text-muted);line-height:1.6}
+
+    /* ── CHECKLIST ── */
+    .checklist-wrap{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem}
+    .checklist-item{
+      display:flex;align-items:flex-start;gap:1rem;padding:1rem 1.25rem;
+      background:var(--white);border:1px solid var(--border);border-radius:12px;
+      cursor:pointer;transition:all .2s;
+    }
+    .checklist-item:hover{border-color:rgba(110,207,168,.4);background:rgba(110,207,168,.03)}
+    .checklist-item.completed{background:rgba(110,207,168,.06);border-color:rgba(110,207,168,.3)}
+    .check-box{
+      width:20px;height:20px;border-radius:6px;border:2px solid var(--border);
+      flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;
+      transition:all .2s;background:var(--white);
+    }
+    .checklist-item.completed .check-box{background:var(--accent);border-color:var(--accent)}
+    .check-box::after{content:'';display:none}
+    .checklist-item.completed .check-box::after{
+      content:'✓';display:block;font-size:.7rem;font-weight:700;color:var(--dark-bg);
+    }
+    .checklist-label{font-size:.875rem;color:var(--text-primary);line-height:1.5}
+    .checklist-item.completed .checklist-label{color:var(--text-muted);text-decoration:line-through}
+    .checklist-progress-wrap{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem}
+    .checklist-progress-label{font-size:.8rem;color:var(--text-muted);margin-bottom:.6rem}
+    .checklist-bar{height:6px;background:rgba(26,107,138,.1);border-radius:100px;overflow:hidden}
+    .checklist-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:100px;transition:width .4s ease;width:0%}
+
+    /* ── QUIZ ── */
+    .quiz-question{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+    .question-num{font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
+    .question-text{font-size:.95rem;font-weight:500;color:var(--text-primary);line-height:1.6;margin-bottom:1rem}
+    .quiz-options{display:flex;flex-direction:column;gap:.5rem}
+    .quiz-option{
+      display:flex;align-items:flex-start;gap:.75rem;padding:.85rem 1rem;
+      border:1.5px solid var(--border);border-radius:10px;cursor:pointer;
+      transition:all .2s;background:var(--surface);
+    }
+    .quiz-option:hover{border-color:rgba(26,107,138,.3);background:rgba(26,107,138,.04)}
+    .quiz-option input[type=radio]{margin-top:2px;accent-color:var(--primary);flex-shrink:0}
+    .quiz-option-text{font-size:.875rem;color:var(--text-primary);line-height:1.5}
+    .quiz-option.correct{border-color:var(--accent);background:rgba(110,207,168,.08)}
+    .quiz-option.wrong{border-color:#e74c3c;background:rgba(231,76,60,.06)}
+    .quiz-btns{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+    .btn-quiz{padding:.8rem 2rem;border-radius:100px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;border:none}
+    .btn-quiz-primary{background:var(--primary);color:var(--white)}
+    .btn-quiz-primary:hover{background:var(--primary-light);transform:translateY(-1px)}
+    .btn-quiz-outline{background:transparent;color:var(--primary);border:2px solid var(--primary)}
+    .btn-quiz-outline:hover{background:rgba(26,107,138,.06)}
+    .quiz-error{display:none;margin-top:1rem;padding:.75rem 1rem;border-radius:10px;font-size:.875rem;font-weight:500;color:#b44747;background:rgba(180,71,71,.08);border:1px solid rgba(180,71,71,.2)}
+
+    /* ── COMMUNITY FEED ── */
+    .feed-compose{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:1.5rem}
+    .feed-compose-top{display:flex;gap:.75rem;align-items:flex-start;margin-bottom:.75rem}
+    .compose-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--dark-bg);font-size:.78rem;flex-shrink:0}
+    .compose-textarea{
+      flex:1;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:12px;
+      font-family:'DM Sans',sans-serif;font-size:.875rem;color:var(--text-primary);
+      resize:none;outline:none;min-height:80px;transition:border-color .2s;background:var(--surface);
+    }
+    .compose-textarea:focus{border-color:var(--primary-light);background:var(--white)}
+    .compose-textarea::placeholder{color:var(--text-muted);opacity:.6}
+    .compose-actions{display:flex;justify-content:flex-end}
+    .btn-post{padding:.6rem 1.5rem;background:var(--primary);color:var(--white);border:none;border-radius:100px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+    .btn-post:hover{background:var(--primary-light);transform:translateY(-1px)}
+    .feed-list{display:flex;flex-direction:column;gap:1rem}
+    .post-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:1.25rem;transition:box-shadow .2s}
+    .post-card:hover{box-shadow:0 4px 16px rgba(26,107,138,.06)}
+    .post-header{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+    .post-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;flex-shrink:0}
+    .post-avatar.learner-av{background:linear-gradient(135deg,var(--primary),var(--accent));color:var(--dark-bg)}
+    .post-avatar.trainer-av{background:linear-gradient(135deg,#1A6B8A,#2E86AB);color:var(--white)}
+    .post-meta{flex:1}
+    .post-author{font-size:.875rem;font-weight:600;color:var(--text-primary)}
+    .post-role-time{display:flex;align-items:center;gap:.5rem;margin-top:.15rem}
+    .post-role-badge{
+      padding:.1rem .5rem;border-radius:100px;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;
+    }
+    .role-badge-learner{background:var(--accent-soft);color:var(--primary)}
+    .role-badge-trainer{background:rgba(26,107,138,.1);color:var(--primary)}
+    .post-time{font-size:.75rem;color:var(--text-muted)}
+    .post-content{font-size:.875rem;color:var(--text-muted);line-height:1.7;margin-bottom:.75rem}
+    .post-content.rich-text p{margin-bottom:.75rem}
+    .post-content.rich-text p:last-child{margin-bottom:0}
+    .post-actions{display:flex;align-items:center;gap:1rem;padding-top:.75rem;border-top:1px solid var(--border)}
+    .btn-like{display:flex;align-items:center;gap:.4rem;background:none;border:none;font-size:.8rem;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;padding:.3rem .6rem;border-radius:8px;transition:all .2s}
+    .btn-like:hover{background:rgba(231,76,60,.06);color:#e74c3c}
+    .btn-like.liked{color:#e74c3c}
+    .btn-action {
+      display: flex; align-items: center; gap: .4rem;
+      background: none; border: none; font-size: .8rem;
+      color: var(--text-muted); cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      padding: .3rem .6rem; border-radius: 8px; transition: all .2s;
+    }
+    .btn-action:hover { background: var(--surface); color: var(--text-primary); }
+    .btn-delete:hover { background: rgba(231,76,60,.08); color: #e74c3c; }
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      background: var(--dark-bg); color: var(--white);
+      padding: .75rem 1.5rem; border-radius: 100px;
+      font-size: .875rem; z-index: 999;
+      opacity: 0; transition: opacity .3s; pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+    .post-comments{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+    .comment-list{display:flex;flex-direction:column;gap:.65rem;margin-bottom:.8rem}
+    .comment-item{background:var(--surface);border-radius:10px;padding:.65rem .75rem}
+    .comment-head{display:flex;align-items:center;gap:.45rem;margin-bottom:.2rem;font-size:.75rem}
+    .comment-author{font-weight:700;color:var(--text-primary)}
+    .comment-time{color:var(--text-muted)}
+    .comment-text{font-size:.82rem;line-height:1.55;color:var(--text-muted)}
+    .comment-form{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    .comment-input{flex:1;min-width:180px;border:1px solid var(--border);background:var(--white);border-radius:100px;padding:.55rem .85rem;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--text-primary);outline:none}
+    .comment-input:focus{border-color:var(--primary-light)}
+    .btn-comment{border:none;border-radius:100px;background:var(--primary);color:var(--white);font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;padding:.55rem .9rem;cursor:pointer;transition:all .2s}
+    .btn-comment:hover{background:var(--primary-light)}
+
+    /* ── ATTESTATION MODAL ── */
+    .attestation-overlay{display:none;position:fixed;inset:0;background:rgba(11,30,45,.85);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+    .attestation-overlay.active{display:flex}
+    .attestation-card{
+      background:var(--white);border-radius:24px;padding:3rem;max-width:480px;width:90%;
+      text-align:center;animation:slideIn .4s ease both;
+    }
+    .attestation-icon{font-size:3rem;margin-bottom:1rem}
+    .attestation-title{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;color:var(--text-primary);margin-bottom:.4rem}
+    .attestation-status{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:1.5rem}
+    .attestation-score-wrap{background:var(--surface);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem}
+    .score-label{font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem}
+    .score-value{font-family:'Syne',sans-serif;font-size:2.5rem;font-weight:800;color:var(--primary)}
+    .attestation-text{font-size:.9rem;color:var(--text-muted);line-height:1.7;margin-bottom:2rem}
+    .btn-home{display:inline-block;padding:.9rem 2.5rem;background:var(--accent);color:var(--dark-bg);border-radius:100px;text-decoration:none;font-weight:600;font-size:.9rem;transition:all .2s}
+    .btn-home:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(110,207,168,.3)}
+
+    /* ── MOBILE ── */
+    @media(max-width:768px){
+      body{overflow:auto;height:auto;display:block}
+      .hamburger{display:flex}
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .sidebar-overlay.open{display:block}
+      .main-container{margin-left:0;height:auto;overflow:visible}
+      .content-area{padding:1.5rem;overflow:visible;height:auto}
+      .progress-header{left:0}
+      .user-info{display:none}
+      .btn-logout-sm{font-size:.72rem;padding:.3rem .7rem}
+    }
+    @media(max-width:480px){
+      .header{padding:0 1rem}
+      .content-area{padding:1rem}
+      .quiz-btns{flex-direction:column}
+      .btn-quiz{width:100%}
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="header-logo">Nova<span>Soins</span></div>
+  </div>
+  <div class="header-right">
+    <div class="user-info">
+      <div class="user-name" id="userName">Sara Benali</div>
+      <div class="user-role">Apprenant</div>
+    </div>
+    <div class="user-avatar" id="userAvatar">SB</div>
+    <a href="index.html" class="btn-logout-sm" onclick="logout(event)">Déconnexion</a>
+  </div>
+</header>
+
+<!-- PROGRESS -->
+<div class="progress-header">
+  <span class="progress-label">Progression</span>
+  <div class="progress-bar-wrap"><div class="progress-fill" id="progressFill"></div></div>
+  <span class="progress-pct" id="progressPct">60%</span>
+</div>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-label">Module Actif</div>
+  <div class="sidebar-item active" data-section="0"><span class="sidebar-icon">👋</span> Introduction<span class="sidebar-num">1</span></div>
+  <div class="sidebar-item" data-section="1"><span class="sidebar-icon">📖</span> Définition & Buts<span class="sidebar-num">2</span></div>
+  <div class="sidebar-item" data-section="2"><span class="sidebar-icon">🛠️</span> Techniques<span class="sidebar-num">3</span></div>
+  <div class="sidebar-item" data-section="3"><span class="sidebar-icon">📋</span> Étapes<span class="sidebar-num">4</span></div>
+  <div class="sidebar-item" data-section="4"><span class="sidebar-icon">✅</span> Checklist<span class="sidebar-num">5</span></div>
+  <div class="sidebar-item" data-section="5"><span class="sidebar-icon">🎯</span> Quiz Final<span class="sidebar-num">6</span></div>
+  <div style="margin-top:1rem;padding:0 1.5rem"><div style="height:1px;background:var(--border)"></div></div>
+  <div class="sidebar-label" style="margin-top:1rem">Communauté</div>
+  <div class="sidebar-item" data-section="6"><span class="sidebar-icon">💬</span> Fil d'actualité</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-container">
+<div class="content-area" id="contentArea">
+
+  <!-- SECTION 0: INTRO -->
+  <section class="section active" id="sec-0">
+    <h1 class="section-title-main">Hypnose Conversationnelle</h1>
+    <p class="section-subtitle">Module complet pour infirmiers en oncologie — techniques, étapes et pratique clinique.</p>
+    <div class="content-card">
+      <h3>🎯 Objectifs du Module</h3>
+      <p>À l'issue de ce module, vous serez capable d'appliquer les techniques fondamentales de l'hypnose conversationnelle dans votre pratique infirmière quotidienne, notamment pour réduire l'anxiété, la douleur et les insomnies chez les patients oncologiques.</p>
+    </div>
+    <div class="goals-grid">
+      <div class="goal-card">
+        <div class="goal-icon">🧠</div>
+        <div class="goal-title">Comprendre</div>
+        <div class="goal-desc">Les bases scientifiques et le fonctionnement de l'hypnose conversationnelle</div>
+      </div>
+      <div class="goal-card">
+        <div class="goal-icon">🛠️</div>
+        <div class="goal-title">Maîtriser</div>
+        <div class="goal-desc">5 techniques essentielles applicables immédiatement au chevet du patient</div>
+      </div>
+      <div class="goal-card">
+        <div class="goal-icon">✅</div>
+        <div class="goal-title">Pratiquer</div>
+        <div class="goal-desc">Les 3 étapes de l'intervention avec une checklist de préparation complète</div>
+      </div>
+    </div>
+    <div class="content-card" style="background:linear-gradient(135deg,rgba(26,107,138,.06),rgba(110,207,168,.06));border-color:rgba(110,207,168,.3)">
+      <h3>📌 À propos de ce cours</h3>
+      <p>Ce module est basé sur les travaux de <strong>Milton Erickson</strong> et les avancées modernes en neurosciences. Il est conçu spécifiquement pour le contexte paramédicale oncologique, avec des exemples concrets tirés de la pratique clinique.</p>
+    </div>
+  </section>
+
+  <!-- SECTION 1: DEFINITION -->
+  <section class="section" id="sec-1">
+    <h1 class="section-title-main">Définition & Buts</h1>
+    <p class="section-subtitle">Comprendre l'hypnose conversationnelle et ses objectifs thérapeutiques.</p>
+    <div class="content-card">
+      <h3>Qu'est-ce que l'Hypnose Conversationnelle ?</h3>
+      <p>L'hypnose conversationnelle est une technique thérapeutique qui utilise le langage naturel, le ton de la voix et la structure des phrases pour guider l'inconscient du patient vers un état de détente et de réceptivité, <strong>sans transe formelle</strong>. Elle se distingue de l'hypnose classique par son aspect invisible et son intégration fluide dans la conversation ordinaire.</p>
+    </div>
+    <div class="video-wrap">
+      <iframe src="https://www.youtube.com/embed/IcYrbwaUoBM" title="Introduction à l'Hypnose Conversationnelle" allowfullscreen></iframe>
+    </div>
+    <h3 style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text-primary);margin:1.5rem 0 1rem">Les 3 Buts Thérapeutiques</h3>
+    <div class="goals-grid">
+      <div class="goal-card">
+        <div class="goal-icon">💊</div>
+        <div class="goal-title">Réduire les Symptômes</div>
+        <div class="goal-desc">Stress, insomnie, douleur chronique — intervention directe sur la perception</div>
+      </div>
+      <div class="goal-card">
+        <div class="goal-icon">🌱</div>
+        <div class="goal-title">Mobiliser les Ressources</div>
+        <div class="goal-desc">Activer l'inconscient, renforcer l'auto-guérison et restaurer la confiance</div>
+      </div>
+      <div class="goal-card">
+        <div class="goal-icon">🤝</div>
+        <div class="goal-title">Coopération Autonome</div>
+        <div class="goal-desc">Sans contrainte, dans le respect de l'éthique et de l'autonomie du patient</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: TECHNIQUES -->
+  <section class="section" id="sec-2">
+    <h1 class="section-title-main">Boîte à Outils de l'Infirmier</h1>
+    <p class="section-subtitle">5 techniques essentielles à maîtriser pour une pratique efficace et éthique.</p>
+    <div style="display:flex;flex-direction:column;gap:0;margin-bottom:1.5rem">
+      <div class="accordion-item active">
+        <div class="accordion-header" onclick="toggleAccordion(0)">
+          <div class="accordion-header-left">
+            <span class="accordion-badge">Technique 1</span>
+            <span class="accordion-title">La Synchronisation et le Rapport</span>
+          </div>
+          <span class="accordion-chevron">▶</span>
+        </div>
+        <div class="accordion-body">
+          <p>Créer une connexion profonde en s'accordant au rythme du patient. C'est le fondement de toute intervention — sans rapport, rien ne fonctionne.</p>
+          <div class="technique-example">
+            <strong>Comment l'appliquer ?</strong>
+            <p>Ajustez discrètement votre posture, débit de parole et respiration sur ceux du patient avant de commencer un soin douloureux.</p>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAccordion(1)">
+          <div class="accordion-header-left">
+            <span class="accordion-badge">Technique 2</span>
+            <span class="accordion-title">Le Recadrage</span>
+          </div>
+          <span class="accordion-chevron">▶</span>
+        </div>
+        <div class="accordion-body">
+          <p>Transformer la perception d'une situation en changeant l'angle de vue — sans nier la réalité du patient.</p>
+          <div class="technique-example">
+            <strong>Comment l'appliquer ?</strong>
+            <p>Au lieu de « C'est un examen long et difficile », dites : « C'est un moment pour vous reposer et prendre soin de vous. »</p>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAccordion(2)">
+          <div class="accordion-header-left">
+            <span class="accordion-badge">Technique 3</span>
+            <span class="accordion-title">Les Métaphores Thérapeutiques</span>
+          </div>
+          <span class="accordion-chevron">▶</span>
+        </div>
+        <div class="accordion-body">
+          <p>Utiliser des images et des histoires pour contourner les résistances conscientes et communiquer directement avec l'inconscient.</p>
+          <div class="technique-example">
+            <strong>Comment l'appliquer ?</strong>
+            <p>« Imaginez votre douleur comme une vague — elle monte, puis elle redescend toujours, laissant derrière elle un rivage plus calme... »</p>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAccordion(3)">
+          <div class="accordion-header-left">
+            <span class="accordion-badge">Technique 4</span>
+            <span class="accordion-title">Le Langage Permissif</span>
+          </div>
+          <span class="accordion-chevron">▶</span>
+        </div>
+        <div class="accordion-body">
+          <p>Utiliser des formulations qui respectent l'autonomie du patient — proposer, jamais imposer.</p>
+          <div class="technique-example">
+            <strong>Comment l'appliquer ?</strong>
+            <p>Remplacez « Respirez » par « Vous pouvez, si vous le souhaitez, laisser votre respiration devenir plus lente et plus profonde... »</p>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAccordion(4)">
+          <div class="accordion-header-left">
+            <span class="accordion-badge">Technique 5</span>
+            <span class="accordion-title">Les Questions Orientées</span>
+          </div>
+          <span class="accordion-chevron">▶</span>
+        </div>
+        <div class="accordion-body">
+          <p>Poser des questions qui guident naturellement l'esprit vers des ressources positives plutôt que des problèmes.</p>
+          <div class="technique-example">
+            <strong>Comment l'appliquer ?</strong>
+            <p>« Qu'est-ce qui vous aide habituellement à vous sentir plus à l'aise dans ces moments-là ? »</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="video-wrap">
+      <iframe src="https://www.youtube.com/embed/zDSyfwq2lxI" title="Techniques d'Hypnose Conversationnelle" allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <!-- SECTION 3: ÉTAPES -->
+  <section class="section" id="sec-3">
+    <h1 class="section-title-main">Les 3 Étapes de l'Intervention</h1>
+    <p class="section-subtitle">Un protocole structuré et éthique pour chaque intervention au chevet du patient.</p>
+    <div class="steps-timeline">
+      <div class="step-item">
+        <div class="step-circle">1</div>
+        <div class="step-content">
+          <div class="step-title">L'Ancrage Éthique</div>
+          <div class="step-desc">Établir la confiance et obtenir le consentement éclairé. Synchroniser le langage non-verbal. Cette étape est non-négociable — sans consentement explicite, l'intervention s'arrête ici.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle">2</div>
+        <div class="step-content">
+          <div class="step-title">L'Ouverture Progressive</div>
+          <div class="step-desc">Guider vers la relaxation par la respiration et la visualisation. Utiliser le langage permissif. Observer les signaux de réceptivité (ralentissement respiratoire, relâchement musculaire).</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle">3</div>
+        <div class="step-content">
+          <div class="step-title">L'Influence Éthique</div>
+          <div class="step-desc">Appliquer les suggestions verbales, métaphores et visualisation guidée pour atteindre l'objectif thérapeutique. Clôturer progressivement en réorientant le patient vers le présent.</div>
+        </div>
+      </div>
+    </div>
+    <div class="video-wrap" style="margin-top:2rem">
+      <iframe src="https://www.youtube.com/embed/MjLA9cL8Ij8" title="Étapes de l'Hypnose Conversationnelle" allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <!-- SECTION 4: CHECKLIST -->
+  <section class="section" id="sec-4">
+    <h1 class="section-title-main">Checklist de Préparation</h1>
+    <p class="section-subtitle">Validez chaque étape avant et pendant votre intervention. L'état persiste entre les sessions.</p>
+    <div class="checklist-progress-wrap">
+      <div class="checklist-progress-label">Progression de la checklist</div>
+      <div class="checklist-bar"><div class="checklist-bar-fill" id="checklistBar"></div></div>
+    </div>
+    <div class="checklist-wrap" id="checklistWrap">
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="checklist-label">J'ai établi un lien de confiance avec le patient</span>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="checklist-label">J'ai obtenu le consentement verbal explicite du patient</span>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="checklist-label">J'ai adapté mon langage (permissif, positif, orienté ressources)</span>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="checklist-label">J'ai synchronisé ma respiration sur celle du patient</span>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="checklist-label">J'ai proposé une visualisation adaptée au contexte clinique</span>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="checklist-label">J'ai utilisé des métaphores thérapeutiques appropriées</span>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="checklist-label">J'ai respecté le rythme du patient tout au long de l'intervention</span>
+      </div>
+      <div class="checklist-item" onclick="toggleCheck(this)">
+        <div class="check-box"></div>
+        <span class="checklist-label">J'ai clôturé l'intervention progressivement et accompagné le retour</span>
+      </div>
+    </div>
+    <button onclick="showSection(5)" style="padding:.85rem 2rem;background:var(--accent);color:var(--dark-bg);border:none;border-radius:100px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+      Passer au Quiz Final →
+    </button>
+  </section>
+
+  <!-- SECTION 5: QUIZ -->
+  <section class="section" id="sec-5">
+    <h1 class="section-title-main">Quiz Final</h1>
+    <p class="section-subtitle">5 questions pour valider votre compréhension. Score requis : 4/5 pour obtenir l'attestation.</p>
+    <div id="quizForm">
+      <div class="quiz-question">
+        <div class="question-num">Question 1 sur 5</div>
+        <div class="question-text">Quelle est la principale différence entre l'hypnose conversationnelle et l'hypnose traditionnelle ?</div>
+        <div class="quiz-options">
+          <label class="quiz-option"><input type="radio" name="q1" value="A"><span class="quiz-option-text">A) L'hypnose conversationnelle nécessite toujours un état de transe profond</span></label>
+          <label class="quiz-option"><input type="radio" name="q1" value="B"><span class="quiz-option-text">B) L'hypnose conversationnelle utilise uniquement des médicaments</span></label>
+          <label class="quiz-option"><input type="radio" name="q1" value="C"><span class="quiz-option-text">C) L'hypnose conversationnelle intègre des suggestions dans la communication naturelle sans transe formelle</span></label>
+          <label class="quiz-option"><input type="radio" name="q1" value="D"><span class="quiz-option-text">D) L'hypnose conversationnelle est réservée aux psychiatres</span></label>
+        </div>
+      </div>
+      <div class="quiz-question">
+        <div class="question-num">Question 2 sur 5</div>
+        <div class="question-text">Quelle formulation illustre le mieux le langage permissif en hypnose conversationnelle ?</div>
+        <div class="quiz-options">
+          <label class="quiz-option"><input type="radio" name="q2" value="A"><span class="quiz-option-text">A) "Vous allez avoir très mal, mais c'est normal"</span></label>
+          <label class="quiz-option"><input type="radio" name="q2" value="B"><span class="quiz-option-text">B) "Vous pouvez vous souvenir d'un endroit où vous vous sentez en sécurité"</span></label>
+          <label class="quiz-option"><input type="radio" name="q2" value="C"><span class="quiz-option-text">C) "Restez immobile et ne bougez pas du tout"</span></label>
+          <label class="quiz-option"><input type="radio" name="q2" value="D"><span class="quiz-option-text">D) "Vous ne sentirez absolument rien"</span></label>
+        </div>
+      </div>
+      <div class="quiz-question">
+        <div class="question-num">Question 3 sur 5</div>
+        <div class="question-text">Quel est l'objectif principal du rapport en début de rencontre ?</div>
+        <div class="quiz-options">
+          <label class="quiz-option"><input type="radio" name="q3" value="A"><span class="quiz-option-text">A) Dominer le patient pour le mettre en état de transe</span></label>
+          <label class="quiz-option"><input type="radio" name="q3" value="B"><span class="quiz-option-text">B) Collecter le maximum d'informations médicales</span></label>
+          <label class="quiz-option"><input type="radio" name="q3" value="C"><span class="quiz-option-text">C) Établir une alliance thérapeutique basée sur la confiance et la sécurité</span></label>
+          <label class="quiz-option"><input type="radio" name="q3" value="D"><span class="quiz-option-text">D) Endormir rapidement le patient</span></label>
+        </div>
+      </div>
+      <div class="quiz-question">
+        <div class="question-num">Question 4 sur 5</div>
+        <div class="question-text">Comment l'hypnose conversationnelle peut-elle être utilisée de manière éthique chez un patient atteint de cancer ?</div>
+        <div class="quiz-options">
+          <label class="quiz-option"><input type="radio" name="q4" value="A"><span class="quiz-option-text">A) Pour remplacer complètement les traitements oncologiques</span></label>
+          <label class="quiz-option"><input type="radio" name="q4" value="B"><span class="quiz-option-text">B) Pour imposer des pensées positives au patient contre son gré</span></label>
+          <label class="quiz-option"><input type="radio" name="q4" value="C"><span class="quiz-option-text">C) Pour aider le patient à mieux tolérer une chimiothérapie consentie</span></label>
+          <label class="quiz-option"><input type="radio" name="q4" value="D"><span class="quiz-option-text">D) Pour modifier les résultats des scanners</span></label>
+        </div>
+      </div>
+      <div class="quiz-question">
+        <div class="question-num">Question 5 sur 5</div>
+        <div class="question-text">Quel est un indicateur observable que le patient entre dans un état hypnotique conversationnel ?</div>
+        <div class="quiz-options">
+          <label class="quiz-option"><input type="radio" name="q5" value="A"><span class="quiz-option-text">A) Le patient s'endort profondément et ne peut pas parler</span></label>
+          <label class="quiz-option"><input type="radio" name="q5" value="B"><span class="quiz-option-text">B) Le patient tremble ou crie</span></label>
+          <label class="quiz-option"><input type="radio" name="q5" value="C"><span class="quiz-option-text">C) Regard fixe ou flottant, respiration régulière et lente, détente musculaire</span></label>
+          <label class="quiz-option"><input type="radio" name="q5" value="D"><span class="quiz-option-text">D) Le patient transpire énormément</span></label>
+        </div>
+      </div>
+      <div class="quiz-btns">
+        <button class="btn-quiz btn-quiz-primary" onclick="submitQuiz()">Soumettre les réponses</button>
+        <button class="btn-quiz btn-quiz-outline" onclick="resetQuiz()">Réinitialiser</button>
+      </div>
+      <div class="quiz-error" id="quizError"></div>
+    </div>
+  </section>
+
+  <!-- SECTION 6: FEED -->
+  <section class="section" id="sec-6">
+    <h1 class="section-title-main">Fil d'Actualité</h1>
+    <p class="section-subtitle">Partagez vos expériences cliniques et apprenez des autres professionnels.</p>
+    <div class="feed-compose">
+      <div class="feed-compose-top">
+        <div class="compose-avatar" id="composeAvatar">SB</div>
+        <textarea class="compose-textarea" id="composeText" placeholder="Partagez une expérience clinique, une réflexion ou une question..." rows="3"></textarea>
+      </div>
+      <div class="compose-actions">
+        <button class="btn-post" onclick="submitPost()">Publier</button>
+      </div>
+    </div>
+    <div class="feed-list" id="feedList"></div>
+  </section>
+
+</div>
+</div>
+
+<!-- ATTESTATION -->
+<div class="attestation-overlay" id="attestationModal">
+  <div class="attestation-card">
+    <div class="attestation-icon">🎓</div>
+    <h2 class="attestation-title">Attestation de Formation</h2>
+    <div class="attestation-status">Module Réussi</div>
+    <div class="attestation-score-wrap">
+      <div class="score-label">Score Obtenu</div>
+      <div class="score-value" id="scoreDisplay">0/5</div>
+    </div>
+    <p class="attestation-text">Félicitations ! Vous avez démontré une maîtrise solide des concepts et techniques de l'hypnose conversationnelle. Vous êtes maintenant prêt(e) à appliquer ces outils dans votre pratique clinique.</p>
+    <a href="index.html" class="btn-home">Retour à l'accueil →</a>
+  </div>
+</div>
+
+<script>
+/* ─── CONSTANTS ─── */
+const SESSION_KEY   = 'novasoins_user';
+const CHECKLIST_KEY = 'novasoins_checklist';
+const FEED_KEY      = 'novasoins_feed';
+var inMemoryFeed    = null;
+
+function readStorage(key){
+  try{ return localStorage.getItem(key); }catch(e){ return null; }
+}
+
+function writeStorage(key, value){
+  try{
+    localStorage.setItem(key, value);
+    return true;
+  }catch(e){
+    if(key === FEED_KEY) inMemoryFeed = value;
+    return false;
+  }
+}
+
+const CORRECT = { q1:'C', q2:'B', q3:'C', q4:'C', q5:'C' };
+
+const DEFAULT_POSTS = [
+  { id:1, author:'Prof. Dr. Rahmouni', role:'trainer', av:'DR', time:'2h',
+    content:'Rappel important pour tous : l\'hypnose conversationnelle n\'est pas une manipulation. C\'est un outil d\'alliance thérapeutique. Le consentement éclairé du patient est absolument non négociable.', likes:11 },
+  { id:2, author:'Sara Benali', role:'learner', av:'SB', time:'5h',
+    content:'Première application de la synchronisation respiratoire aujourd\'hui en oncologie — le patient a remarqué la différence immédiatement. La technique du langage permissif fonctionne vraiment. Merci pour le module !', likes:4 },
+  { id:3, author:'Prof. Dr. Rahmouni', role:'trainer', av:'DR', time:'1j',
+    content:'Nouveau cas clinique disponible dans l\'espace formateur : anxiété sévère avant chimiothérapie. Je vous encourage à l\'explorer et à partager vos réflexions ici.', likes:7 },
+];
+
+/* ─── SESSION ─── */
+function getUser(){ try{ return JSON.parse(localStorage.getItem(SESSION_KEY)); }catch(e){ return null; } }
+
+function initSession(){
+  let user = getUser();
+  if(!user || user.role !== 'learner'){
+    user = { name:'Sara Benali', role:'learner', service:'Oncologie' };
+    try{ localStorage.setItem(SESSION_KEY, JSON.stringify(user)); }catch(e){}
+  }
+  document.getElementById('userName').textContent  = user.name  || 'Apprenant';
+  const initials = (user.name||'NS').split(' ').filter(Boolean).map(p=>p[0]).slice(0,2).join('').toUpperCase();
+  document.getElementById('userAvatar').textContent  = initials;
+  document.getElementById('composeAvatar').textContent = initials;
+}
+
+function logout(e){ e.preventDefault(); try{ localStorage.removeItem(SESSION_KEY); }catch(err){} window.location.href='index.html'; }
+
+/* ─── SIDEBAR / MOBILE ─── */
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+/* ─── SECTION NAV ─── */
+function showSection(idx){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('sec-'+idx).classList.add('active');
+  document.querySelectorAll('.sidebar-item')[idx].classList.add('active');
+  document.getElementById('contentArea').scrollTop=0;
+  if(idx===6) renderFeed();
+  updateProgress();
+  if(window.innerWidth<=768) toggleSidebar();
+}
+
+document.querySelectorAll('.sidebar-item').forEach((el,i)=>{
+  el.addEventListener('click',()=>showSection(i));
+});
+
+/* ─── PROGRESS ─── */
+function updateProgress(){
+  const checked = document.querySelectorAll('.checklist-item.completed').length;
+  const total   = document.querySelectorAll('.checklist-item').length;
+  const answered= document.querySelectorAll('input[type=radio]:checked').length;
+  const pct = Math.min(100, Math.round(60 + (checked/total)*20 + (answered/5)*20));
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressPct').textContent  = pct+'%';
+  const checkPct = total>0 ? (checked/total)*100 : 0;
+  const bar = document.getElementById('checklistBar');
+  if(bar) bar.style.width = checkPct+'%';
+}
+
+/* ─── ACCORDION ─── */
+function toggleAccordion(idx){
+  document.querySelectorAll('.accordion-item').forEach((el,i)=>{
+    if(i===idx) el.classList.toggle('active'); else el.classList.remove('active');
+  });
+}
+
+/* ─── CHECKLIST ─── */
+function toggleCheck(el){
+  el.classList.toggle('completed');
+  saveChecklist();
+  updateProgress();
+}
+function saveChecklist(){
+  const states=[...document.querySelectorAll('.checklist-item')].map(el=>el.classList.contains('completed'));
+  try{ localStorage.setItem(CHECKLIST_KEY,JSON.stringify(states)); }catch(e){}
+}
+function loadChecklist(){
+  try{
+    const saved=JSON.parse(readStorage(CHECKLIST_KEY)||'[]');
+    document.querySelectorAll('.checklist-item').forEach((el,i)=>{
+      if(saved[i]) el.classList.add('completed'); else el.classList.remove('completed');
+    });
+  }catch(e){}
+}
+
+/* ─── QUIZ ─── */
+function submitQuiz(){
+  const err=document.getElementById('quizError');
+  err.style.display='none';
+  let score=0, allAnswered=true;
+  for(const [q,ans] of Object.entries(CORRECT)){
+    const sel=document.querySelector(`input[name="${q}"]:checked`);
+    if(!sel){ allAnswered=false; break; }
+    if(sel.value===ans) score++;
+  }
+  if(!allAnswered){
+    err.textContent='⚠️ Veuillez répondre à toutes les questions avant de soumettre.';
+    err.style.display='block'; return;
+  }
+  document.getElementById('scoreDisplay').textContent=score+'/5';
+  if(score>=4){
+    document.getElementById('attestationModal').classList.add('active');
+  } else {
+    err.textContent=`❌ Score : ${score}/5. Score requis : 4/5. Révisez et réessayez !`;
+    err.style.display='block';
+  }
+  updateProgress();
+}
+function resetQuiz(){
+  document.querySelectorAll('input[type=radio]').forEach(i=>i.checked=false);
+  document.getElementById('quizError').style.display='none';
+  updateProgress();
+}
+
+/* ─── FEED ─── */
+function getFeed(){
+  try{
+    const raw = readStorage(FEED_KEY);
+    if(raw) return JSON.parse(raw);
+    if(inMemoryFeed) return JSON.parse(inMemoryFeed);
+    return null;
+  }catch(e){ return null; }
+}
+function saveFeed(posts){ writeStorage(FEED_KEY,JSON.stringify(posts)); }
+
+function initFeed(){
+  if(!getFeed()) saveFeed(DEFAULT_POSTS);
+}
+
+function renderFeedOld(){
+  const posts = getFeed() || DEFAULT_POSTS;
+  const user  = getUser();
+  const list  = document.getElementById('feedList');
+  list.innerHTML = posts.map(p=>`
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar ${p.role==='trainer'?'trainer-av':'learner-av'}">${p.av}</div>
+        <div class="post-meta">
+          <div class="post-author">${p.author}</div>
+          <div class="post-role-time">
+            <span class="post-role-badge ${p.role==='trainer'?'role-badge-trainer':'role-badge-learner'}">${p.role==='trainer'?'Formateur':'Infirmier(e)'}</span>
+            <span class="post-time">${p.time}</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-content rich-text">${renderRichText(p.content)}</div>
+      <div class="post-actions">
+        <button class="btn-like" onclick="likePost(${p.id},this)">
+          ♡ ${p.likes} J'aime
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function submitPost(){
+  const text = document.getElementById('composeText').value.trim();
+  if(!text) return;
+  const user  = getUser() || { name:'Apprenant', role:'learner' };
+  const av    = (user.name||'NS').split(' ').filter(Boolean).map(p=>p[0]).slice(0,2).join('').toUpperCase();
+  const posts = getFeed() || [];
+  posts.unshift({ id:Date.now(), author:user.name||'Apprenant', role:user.role||'learner', av, time:'À l\'instant', content:text, likes:0 });
+  saveFeed(posts);
+  document.getElementById('composeText').value='';
+  renderFeed();
+}
+
+function likePost(id, btn){
+  const posts = getFeed() || [];
+  const post  = posts.find(p=>p.id===id);
+  if(!post) return;
+  const liked = btn.classList.toggle('liked');
+  post.likes  = liked ? post.likes+1 : Math.max(0,post.likes-1);
+  btn.innerHTML= `♡ ${post.likes} J'aime`;
+  saveFeed(posts);
+}
+
+/* ─── INIT ─── */
+function renderFeed(){
+  const posts = getFeed() || DEFAULT_POSTS;
+  const user  = getUser();
+  const list  = document.getElementById('feedList');
+  list.innerHTML = posts.map(p => {
+    const isOwner = user && user.name === p.author;
+    const avClass = p.role === 'trainer' ? 'trainer-av' : 'learner-av';
+    const pillClass = p.role === 'trainer' ? 'role-badge-trainer' : 'role-badge-learner';
+    const roleLabel = p.role === 'trainer' ? 'Formateur' : 'Infirmier(e)';
+
+    return `
+      <div class="post-card" id="post-${p.id}">
+        <div class="post-header">
+          <div class="post-avatar ${avClass}">${p.av}</div>
+          <div class="post-meta">
+            <div class="post-author">${p.author}</div>
+            <div class="post-role-time">
+              <span class="post-role-badge ${pillClass}">${roleLabel}</span>
+              <span class="post-time">${p.time}</span>
+            </div>
+          </div>
+        </div>
+        <div class="post-content rich-text">${renderRichText(p.content)}</div>
+        <div class="post-actions">
+          <button class="btn-like" onclick="likePost(${p.id},this)">♡ ${p.likes} J'aime</button>
+          <button class="btn-action" onclick="sharePost(${p.id})">↗ Partager</button>
+          ${isOwner ? `<button class="btn-action btn-delete" onclick="deletePost(${p.id})">🗑 Supprimer</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function sharePost(id) {
+  const posts = getFeed() || DEFAULT_POSTS;
+  const post  = posts.find(p => p.id === id);
+  if (!post) return;
+  const text = `${post.author} sur NovaSoins Infirmiers :\n\n"${post.content}"`;
+  navigator.clipboard.writeText(text)
+    .then(()  => showToast('✓ Post copié dans le presse-papiers'))
+    .catch(()  => showToast('Sélectionnez le texte manuellement'));
+}
+
+function deletePost(id) {
+  const posts = getFeed() || DEFAULT_POSTS;
+  const idx   = posts.findIndex(p => p.id === id);
+  if (idx === -1) return;
+  posts.splice(idx, 1);
+  saveFeed(posts);
+  renderFeed();
+  showToast('Post supprimé');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, ch => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[ch]));
+}
+
+function renderComments(post) {
+  const comments = post.comments || [];
+  const count = comments.length;
+  const list = comments.length
+    ? `<div class="comment-list">${comments.map(c => `
+        <div class="comment-item">
+          <div class="comment-head">
+            <span class="comment-author">${escapeHtml(c.author)}</span>
+            <span class="comment-time">${escapeHtml(c.time)}</span>
+          </div>
+          <div class="comment-text">${escapeHtml(c.text)}</div>
+        </div>
+      `).join('')}</div>`
+    : '';
+
+  return `
+    <div class="post-comments">
+      ${list}
+      <div class="comment-form">
+        <input class="comment-input" id="comment-${post.id}" type="text" placeholder="${count ? 'Ajouter un commentaire' : 'Soyez le premier à commenter'}" onkeydown="if(event.key==='Enter') addComment(${post.id})">
+        <button class="btn-comment" onclick="addComment(${post.id})">Commenter</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderFeed(){
+  const posts = getFeed() || DEFAULT_POSTS;
+  const user  = getUser();
+  const list  = document.getElementById('feedList');
+  list.innerHTML = posts.map(p => {
+    const isOwner = user && user.name === p.author;
+    const avClass = p.role === 'trainer' ? 'trainer-av' : 'learner-av';
+    const pillClass = p.role === 'trainer' ? 'role-badge-trainer' : 'role-badge-learner';
+    const roleLabel = p.role === 'trainer' ? 'Formateur' : 'Infirmier(e)';
+    const commentCount = (p.comments || []).length;
+
+    return `
+      <div class="post-card" id="post-${p.id}">
+        <div class="post-header">
+          <div class="post-avatar ${avClass}">${p.av}</div>
+          <div class="post-meta">
+            <div class="post-author">${p.author}</div>
+            <div class="post-role-time">
+              <span class="post-role-badge ${pillClass}">${roleLabel}</span>
+              <span class="post-time">${p.time}</span>
+            </div>
+          </div>
+        </div>
+        <div class="post-content rich-text">${renderRichText(p.content)}</div>
+        <div class="post-actions">
+          <button class="btn-like" onclick="likePost(${p.id},this)">♡ ${p.likes} J'aime</button>
+          <button class="btn-action" onclick="document.getElementById('comment-${p.id}').focus()">💬 ${commentCount} Commentaire${commentCount > 1 ? 's' : ''}</button>
+          <button class="btn-action" onclick="sharePost(${p.id})">↗ Partager</button>
+          ${isOwner ? `<button class="btn-action btn-delete" onclick="deletePost(${p.id})">🗑 Supprimer</button>` : ''}
+        </div>
+        ${renderComments(p)}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderRichText(value){
+  const text = String(value || '').replace(/\r\n?/g, '\n').trim();
+  if(!text) return '';
+  const cleaned = text.replace(/```[\s\S]*?```/g, block => {
+    return block.replace(/```[a-zA-Z0-9_-]*\n?/g, '').replace(/```/g, '');
+  });
+  return cleaned.split(/\n{2,}/).map(block => {
+    return `<p>${escapeHtml(block).replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+}
+
+function addComment(id) {
+  const input = document.getElementById(`comment-${id}`);
+  const text = input ? input.value.trim() : '';
+  if (!text) return;
+  const posts = getFeed() || DEFAULT_POSTS;
+  const post = posts.find(p => p.id === id);
+  const user = getUser() || { name:'Apprenant' };
+  if (!post) return;
+  post.comments = post.comments || [];
+  post.comments.push({ id:Date.now(), author:user.name || 'Apprenant', text, time:'À l\'instant' });
+  saveFeed(posts);
+  renderFeed();
+  showToast('Commentaire ajouté');
+}
+
+initSession();
+initFeed();
+loadChecklist();
+updateProgress();
+</script>
+<div class="toast" id="toast"></div>
+</body>
+</html>
